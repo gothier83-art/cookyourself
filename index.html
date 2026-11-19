@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="CookYourself">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
 :root{--bg:#f6f7f5;--card:#fff;--ink:#1c2321;--mute:#5d6b67;--acc:#0f766e;--acc2:#e6f3f1;--line:#dfe5e3}
 @media (prefers-color-scheme:dark){:root{--bg:#111615;--card:#1b2220;--ink:#e8eeec;--mute:#9aa8a4;--acc:#2dd4bf;--acc2:#16302c;--line:#2a3431}}
@@ -27,7 +27,10 @@ label{display:block;font-size:13px;color:var(--mute);margin:8px 0 4px}
 ul{list-style:none;padding:0;margin:8px 0 0}li{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
 li button{padding:4px 10px;font-size:13px}
 nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
-nav button{flex:1;min-width:0;background:none;font-size:13px;padding:10px 4px;color:var(--mute)}nav button.on{color:var(--acc);font-weight:700}
+nav button{flex:1;min-width:0;background:none;font-size:12px;padding:10px 2px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}nav button.on{color:var(--acc);font-weight:700}
+.rc{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 8px}
+.rc b{display:block;font-size:16px}.chips button.on{background:var(--acc);color:#fff}
+ol.et{padding-left:20px;margin:8px 0 0}ol.et li{display:list-item;border:0;padding:4px 0;font-size:15px}
 .est{font-size:13px;color:var(--mute)}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chips button{padding:8px 12px;font-size:14px}
 .hide{display:none}.bar{height:10px;border-radius:6px;background:var(--acc2);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
 .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
@@ -108,6 +111,33 @@ small a{color:var(--acc)}
       <button id="ciqImp">Importer une autre version (.xlsx ou .csv)</button>
       <input id="ciqFile" type="file" accept=".xlsx,.csv,.txt,text/csv" class="hide">
       <div class="est" style="margin-top:8px">À télécharger une fois sur le site officiel : <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ciqual.anses.fr</a>. Le fichier est lu sur ton téléphone ; rien n'est envoyé.</div>
+    </div>
+  </section>
+
+  <!-- RECETTES -->
+  <section id="v-recettes" class="hide">
+    <div id="rListeBloc">
+      <div class="card" style="padding:12px 16px">
+        <div class="lbl">Recettes simples et pas chères · calories calculées avec Ciqual</div>
+        <div class="chips" id="rFiltres"><button data-rf="" class="on">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button></div>
+      </div>
+      <div id="rListe"></div>
+    </div>
+    <div id="rFiche" class="hide">
+      <div class="card">
+        <button id="rRetour" style="padding:6px 12px;font-size:14px">← Toutes les recettes</button>
+        <div style="font-weight:700;font-size:20px;margin:10px 0 2px" id="rNom"></div>
+        <div class="est" id="rInfos"></div>
+        <div class="num" style="margin-top:10px"><span style="font-size:26px;font-weight:700" id="rKcal"></span> <span class="est" id="rKcalDet"></span></div>
+        <label>Nombre de portions</label>
+        <div class="chips" id="rPortions"><button data-rp="1">1</button><button data-rp="2">2</button><button data-rp="3">3</button><button data-rp="4">4</button><button data-rp="6">6</button></div>
+      </div>
+      <div class="card"><div class="lbl">Ingrédients</div><ul id="rIng"></ul></div>
+      <div class="card"><div class="lbl">Étapes</div><ol class="et" id="rEtapes"></ol></div>
+      <div class="card">
+        <button class="main" id="rManger">J'en mange une portion</button>
+        <div class="est" style="margin-top:8px">Ajoute une portion à tes repas du jour. Calories = estimation à partir des valeurs moyennes Ciqual (ANSES 2025) ; huile et quantités réelles font varier le résultat.</div>
+      </div>
     </div>
   </section>
 
@@ -202,8 +232,9 @@ small a{color:var(--acc)}
 </main>
 
 <nav>
-  <button data-v="jour" class="on">Aujourd'hui</button>
+  <button data-v="jour" class="on">Jour</button>
   <button data-v="manger">Manger</button>
+  <button data-v="recettes">Recettes</button>
   <button data-v="seance">Sport</button>
   <button data-v="histo">Historique</button>
   <button data-v="regl">Réglages</button>
@@ -211,6 +242,7 @@ small a{color:var(--acc)}
 <div class="toast" id="toast"></div>
 
 <script src="ciqual.js"></script>
+<script src="recettes.js"></script>
 <script>
 (function(){
   var KEY='ungeste.v1';
@@ -265,7 +297,7 @@ small a{color:var(--acc)}
     if(d.delr!==undefined){jour().repas.splice(+d.delr,1);save();rendre()}
     if(d.dels!==undefined){jour().seances.splice(+d.dels,1);save();rendre()}
     if(d.v){if(t.tagName==='A')e.preventDefault();document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===d.v)});
-      ['jour','manger','seance','histo','regl'].forEach(function(v){$('v-'+v).classList.toggle('hide',v!==d.v)});window.scrollTo(0,0)}
+      ['jour','manger','recettes','seance','histo','regl'].forEach(function(v){$('v-'+v).classList.toggle('hide',v!==d.v)});window.scrollTo(0,0)}
   });
   $('sType').onchange=calcSeance;$('sDuree').oninput=calcSeance;
   $('ajSeance').onclick=function(){var met=parseFloat($('sType').value),min=parseFloat($('sDuree').value)||0;if(!min)return;
@@ -465,6 +497,45 @@ small a{color:var(--acc)}
     prog=prog==='A'?'B':'A';try{localStorage.setItem('ungeste.prog',prog)}catch(e){}rendreProg();$('finInfo').textContent='Séance enregistrée ('+min+' min). La prochaine sera la séance '+prog+'.';stop()};
   try{prog=localStorage.getItem('ungeste.prog')||'A'}catch(e){}
   rendreProg();
+})();
+
+/* ===== Recettes : simples, pas chères, calories calculées avec Ciqual ===== */
+(function(){
+  function $(i){return document.getElementById(i)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function toast_(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1500)}
+  var R=window.RECETTES||[], C={}, filtre='', cur=null, nbp=2;
+  (window.CIQUAL&&window.CIQUAL.aliments||[]).forEach(function(a){C[a[0]]=a});
+  function cache(){try{return window.UnGeste.db().reglages.cache}catch(e){return false}}
+  /* calories et protéines pour UNE portion */
+  function valeurs(r){var k=0,p=0,ok=true;r.ing.forEach(function(x){var a=C[x[1]];if(!a||a[1]==null){ok=false;return}k+=a[1]*x[2]/100;p+=(a[2]||0)*x[2]/100});
+    return{k:Math.round(k/r.portions),p:Math.round(p/r.portions),ok:ok}}
+  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'};
+  function liste(){var h=R.filter(function(r){return !filtre||r.tags.indexOf(filtre)>=0}).map(function(r){var v=valeurs(r);
+      return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+r.tags.map(function(t){return ICO[t]||''}).join(' ')+'</span></span>'+
+        (cache()?'':'<span class="est" style="text-align:right;white-space:nowrap">≈ '+v.k+' kcal<br>'+v.p+' g prot.</span>')+'</button>'}).join('');
+    $('rListe').innerHTML=h||'<div class="card est">Aucune recette pour ce filtre.</div>';
+    document.querySelectorAll('[data-rf]').forEach(function(b){b.classList.toggle('on',b.dataset.rf===filtre)})}
+  function fmt(g){return g>=1000?(Math.round(g/100)/10).toString().replace('.',',')+' kg':Math.round(g)+' g'}
+  function fiche(){if(!cur)return;var r=cur,v=valeurs(r),f=nbp/r.portions;
+    $('rNom').textContent=r.nom;$('rInfos').textContent=r.min+' min · ingrédients pour '+nbp+' portion'+(nbp>1?'s':'');
+    $('rKcal').textContent=cache()?'':'≈ '+v.k+' kcal';$('rKcalDet').textContent=cache()?'':'par portion ('+Math.round(v.k*.85)+'-'+Math.round(v.k*1.15)+') · '+v.p+' g de protéines';
+    document.querySelectorAll('.num').forEach(function(e){e.style.display=cache()?'none':''});
+    document.querySelectorAll('[data-rp]').forEach(function(b){b.classList.toggle('on',+b.dataset.rp===nbp)});
+    $('rIng').innerHTML=r.ing.map(function(x){return '<li><span>'+esc(x[0])+'</span><span class="est">'+fmt(x[2]*f)+'</span></li>'}).join('');
+    $('rEtapes').innerHTML=r.etapes.map(function(e){return '<li>'+esc(e)+'</li>'}).join('')}
+  function ouvrir(id){cur=R.filter(function(r){return r.id===id})[0];if(!cur)return;nbp=cur.portions;
+    $('rListeBloc').classList.add('hide');$('rFiche').classList.remove('hide');fiche();window.scrollTo(0,0)}
+  function fermer(){cur=null;$('rFiche').classList.add('hide');$('rListeBloc').classList.remove('hide');liste()}
+  document.addEventListener('click',function(ev){var t=ev.target.closest?ev.target.closest('[data-rid],[data-rf],[data-rp],[data-v]'):ev.target;if(!t)return;var d=t.dataset;
+    if(d.rid)ouvrir(d.rid);
+    if(d.rf!==undefined){filtre=d.rf;liste()}
+    if(d.rp){nbp=+d.rp;fiche()}
+    if(d.v==='recettes'){if(cur)fiche();else liste()}});
+  $('rRetour').onclick=fermer;
+  $('rManger').onclick=function(){if(!cur)return;var v=valeurs(cur);
+    window.UnGeste.ajouterRepas({nom:cur.nom+' (1 portion)',kcal:v.ok?v.k:null,src:'CIQUAL'});toast_('Ajouté à tes repas du jour');if(navigator.vibrate)navigator.vibrate(15)};
+  liste();
 })();
 </script>
 <script>
