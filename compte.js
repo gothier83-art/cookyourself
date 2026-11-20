@@ -89,6 +89,8 @@
   }
 
   /* ---------- Interface ---------- */
+  /* Adresse de retour des e-mails (confirmation, mot de passe) : toujours /app/, jamais /app/index.html (redirigé). */
+  function retourUrl(){ var p = location.pathname.replace(/index\.html$/, ''); if (/\/app$/.test(p)) p += '/'; return location.origin + p; }
   function joursUtilises(){ var J = (U.db() || {}).jours || {}; return Object.keys(J).filter(function(k){ var j = J[k] || {}; return (j.repas||[]).length || (j.series||[]).length || (j.seances||[]).length || j.ml || j.sommeil; }).length; }
   function dessiner(){
     var z = $('cZone'); if (!z) return;
@@ -136,7 +138,7 @@
         var mail = $('cMail').value.trim();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)) { etat('Tape d\'abord ton e-mail ci-dessus.', 1); $('cMail').focus(); return; }
         occupe(this, 1, 'Envoi…');
-        var r = await sb.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + location.pathname });
+        var r = await sb.auth.resetPasswordForEmail(mail, { redirectTo: retourUrl() });
         occupe(this, 0);
         etat(r.error ? 'Envoi impossible pour l\'instant. Réessaie dans quelques minutes.' : 'E-mail envoyé. Clique sur le lien reçu pour choisir un nouveau mot de passe.', !!r.error);
       };
@@ -152,7 +154,7 @@
         if (ins) {
           if (!$('cAccord').checked) { etat('Coche la case d\'accord pour continuer.', 1); return; }
           etat('Création du compte…'); occupe(btn, 1);
-          var r = await sb.auth.signUp({ email: mail, password: pass, options: { emailRedirectTo: location.origin + location.pathname, data: { accord_sante: true, accord_version: VERSION_ACCORD } } });
+          var r = await sb.auth.signUp({ email: mail, password: pass, options: { emailRedirectTo: retourUrl(), data: { accord_sante: true, accord_version: VERSION_ACCORD } } });
           occupe(btn, 0);
           if (r.error) { etat(/registered|exists/i.test(r.error.message) ? 'Ce compte existe déjà : connecte-toi.' : /rate|limit/i.test(r.error.message) ? 'Trop d\'essais : réessaie dans une heure.' : 'Création impossible pour l\'instant. Réessaie dans quelques minutes.', 1); return; }
           if (r.data && r.data.user && r.data.user.identities && !r.data.user.identities.length) { vue = 'connexion'; dessiner(); etat('Ce compte existe déjà : connecte-toi avec ton mot de passe.', 1); return; }
@@ -264,7 +266,7 @@
   /* Utilisé par le premier lancement (écran « Crée ton compte »). Renvoie { ok, attente, message }. */
   async function inscrire(mail, pass){
     if (!(await pret)) return { ok:false, message:'Pas de réseau : tu pourras créer ton compte plus tard dans Réglages.' };
-    var r = await sb.auth.signUp({ email: mail, password: pass, options: { emailRedirectTo: location.origin + location.pathname, data: { accord_sante: true, accord_version: VERSION_ACCORD } } });
+    var r = await sb.auth.signUp({ email: mail, password: pass, options: { emailRedirectTo: retourUrl(), data: { accord_sante: true, accord_version: VERSION_ACCORD } } });
     if (r.error) return { ok:false, message: /registered|exists/i.test(r.error.message) ? 'Ce compte existe déjà : choisis « J\'ai déjà un compte ».' : /rate|limit/i.test(r.error.message) ? 'Trop d\'essais : réessaie dans une heure.' : /password/i.test(r.error.message) ? 'Mot de passe trop faible : 8 caractères minimum.' : 'Création impossible pour l\'instant. Réessaie dans quelques minutes.' };
     if (r.data && r.data.user && r.data.user.identities && !r.data.user.identities.length) return { ok:false, message:'Ce compte existe déjà : choisis « J\'ai déjà un compte ».' };
     if (r.data && r.data.session) return { ok:true };
@@ -278,7 +280,7 @@
   }
   async function oubli(mail){
     if (!(await pret)) return { ok:false, message:'Pas de réseau : réessaie plus tard.' };
-    var r = await sb.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + location.pathname });
+    var r = await sb.auth.resetPasswordForEmail(mail, { redirectTo: retourUrl() });
     return r.error ? { ok:false, message:'Envoi impossible pour l\'instant. Réessaie dans quelques minutes.' } : { ok:true, message:'E-mail envoyé. Touche le lien reçu pour choisir un nouveau mot de passe.' };
   }
   window.CYcompte = { fusion: fusion, inscrire: inscrire, connecter: connecter, oubli: oubli, actif: actif, connecte: function(){ return !!user; } };
