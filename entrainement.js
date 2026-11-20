@@ -1,0 +1,173 @@
+/* CookYourself · Entraînement : objectifs, bibliothèque d'exercices par muscle, routines, machines de la salle,
+   réglage de la séance (séries + repos) et chrono de repos entre les séries.
+   Dépend de window.UnGeste et window.CYsport (index.html). Données dans la même base locale (ungeste.v1). */
+(function(){
+  var U=window.UnGeste,S=window.CYsport;if(!U||!S)return;
+  function $(i){return document.getElementById(i)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function toast(t,ms){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},ms||1800)}
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+  /* ===== Objectifs ===== */
+  var GOAL={
+    poids:{nom:'Perdre du poids',ic:'⚖️',series:3,repos:60,reps:'12 à 15',rN:15,kcal:-500,prot:1.6,plan:'Léger déficit de calories, 3 à 4 séances par semaine et 8 000 pas par jour.'},
+    graisse:{nom:'Perdre de la graisse',ic:'🔥',series:4,repos:120,reps:'6 à 10',rN:10,kcal:-300,prot:2.0,plan:'Petit déficit, beaucoup de protéines et de la musculation pour garder ton muscle.'},
+    masse:{nom:'Prendre de la masse',ic:'💪',series:4,repos:90,reps:'8 à 12',rN:12,kcal:300,prot:1.8,plan:'Léger surplus de calories, 3 à 5 séances, 10 à 20 séries par muscle et par semaine.'},
+    perf:{nom:'Augmenter mes performances',ic:'🚀',series:5,repos:150,reps:'4 à 6',rN:6,kcal:150,prot:1.6,plan:'Charges lourdes, peu de répétitions, longs repos et un sommeil soigné.'},
+    garder:{nom:'Garder la forme',ic:'🙂',series:3,repos:75,reps:'10 à 12',rN:12,kcal:0,prot:1.2,plan:'Calories équilibrées, 2 à 3 séances par semaine.'}};
+  function but(){var b=String((U.db().profil||{}).but||'');return GOAL[b]?b:({'-400':'poids','300':'masse'}[b]||'garder')}
+  function butChoisi(){return !!GOAL[String((U.db().profil||{}).but||'')]}
+  window.CYobj={GOAL:GOAL,but:but,choisi:butChoisi,choisir:function(k){var d=U.db();if(!d.profil)d.profil={sexe:'',age:'',taille:'',metier:'1.4',but:'0'};d.profil.but=k;var c=d.seanceCfg;if(c){delete c.jour}U.save();appliquer()}};
+
+  /* ===== Bibliothèque d'exercices (ajoutés à ceux du programme débutant) ===== */
+  function X(k,nom,muscles,poids,fiche,unite){S.ajouter(k,{nom:nom,muscles:muscles,obj:'',reps:10,series:3,poids:poids,fiche:fiche,unite:unite})}
+  X('x_presse','Presse à cuisses','Cuisses · fessiers',true,['<b>Départ</b> : dos et bassin bien collés au dossier, pieds largeur de hanches au milieu du plateau.','<b>Mouvement</b> : descends jusqu\'à ce que les genoux fassent environ 90°, puis pousse sans verrouiller les genoux.','<b>Erreurs</b> : bassin qui décolle en bas, genoux qui rentrent.']);
+  X('x_legext','Leg extension (machine)','Avant des cuisses',true,['<b>Réglage</b> : l\'axe de la machine en face de tes genoux, le boudin au-dessus des chevilles.','<b>Mouvement</b> : tends les jambes, tiens 1 s, redescends lentement.','<b>Erreurs</b> : donner de l\'élan, charge trop lourde.']);
+  X('x_legcurl','Leg curl (machine)','Arrière des cuisses',true,['<b>Réglage</b> : genoux dans l\'axe de la machine, boudin juste au-dessus des talons.','<b>Mouvement</b> : ramène les talons vers les fesses, redescends en contrôlant.','<b>Erreurs</b> : bassin qui se soulève.']);
+  X('x_mollets','Mollets debout (machine)','Mollets',true,['<b>Départ</b> : avant du pied sur la marche, talons dans le vide.','<b>Mouvement</b> : monte le plus haut possible, tiens 1 s, descends talons bas.','<b>Erreurs</b> : rebondir en bas.']);
+  X('x_mollets_pdc','Mollets sur une marche','Mollets',false,['<b>Départ</b> : avant du pied sur une marche, une main au mur.','<b>Mouvement</b> : monte sur la pointe, tiens 1 s, redescends lentement sous la marche.','<b>Plus dur</b> : sur une seule jambe.']);
+  X('x_fentesbulg','Fentes bulgares','Cuisses · fessiers',true,['<b>Départ</b> : pied arrière posé sur un banc ou une chaise, pied avant un grand pas devant.','<b>Mouvement</b> : descends droit jusqu\'à ce que la cuisse avant soit parallèle au sol, remonte.','<b>Erreurs</b> : genou avant qui rentre. Charge facultative (0 kg = poids du corps).']);
+  X('x_pistol','Squat sur une jambe (assisté)','Cuisses · fessiers · équilibre',false,['<b>Départ</b> : sur une jambe, l\'autre tendue devant, une main sur un poteau ou une porte.','<b>Mouvement</b> : descends lentement le plus bas possible en gardant le talon au sol, remonte en t\'aidant un peu du bras.','<b>Plus facile</b> : descends sur un banc et relève-toi.']);
+  X('x_dc','Développé couché (barre)','Pectoraux · triceps · épaules',true,['<b>Départ</b> : allongé, yeux sous la barre, omoplates serrées, pieds au sol.','<b>Mouvement</b> : descends la barre au bas des pectoraux, coudes à environ 45°, pousse.','<b>Sécurité</b> : demande à quelqu\'un de te surveiller dès que c\'est lourd.']);
+  X('x_dih','Développé incliné (haltères)','Haut des pectoraux · épaules',true,['<b>Départ</b> : banc incliné à 30°, haltères au-dessus de la poitrine.','<b>Mouvement</b> : descends les haltères au niveau du haut de la poitrine, pousse en les rapprochant.','<b>Erreurs</b> : banc trop incliné (ça devient les épaules).']);
+  X('x_pecdeck','Pec deck (butterfly)','Pectoraux',true,['<b>Réglage</b> : poignées à hauteur de poitrine, dos collé.','<b>Mouvement</b> : ramène les bras devant toi en serrant les pectoraux, reviens lentement.','<b>Erreurs</b> : épaules qui avancent.']);
+  X('x_dipsm','Dips (barres ou machine)','Pectoraux · triceps',false,['<b>Départ</b> : bras tendus sur les barres, buste légèrement penché.','<b>Mouvement</b> : descends jusqu\'à ce que les coudes fassent 90°, pousse.','<b>Plus facile</b> : machine à dips assistée ou pieds sur un élastique.']);
+  X('x_dipsb','Dips aux barres parallèles','Pectoraux · triceps',false,['<b>Départ</b> : bras tendus sur les barres, épaules basses.','<b>Mouvement</b> : descends jusqu\'à 90° aux coudes, pousse jusqu\'en haut.','<b>Plus facile</b> : dips sur un banc, ou descentes lentes seulement.']);
+  X('x_tirvert','Tirage vertical (poulie haute)','Dos · biceps',true,['<b>Départ</b> : assis, cuisses calées, mains un peu plus larges que les épaules.','<b>Mouvement</b> : tire la barre vers le haut de la poitrine en serrant les omoplates, remonte lentement.','<b>Erreurs</b> : se pencher très en arrière, tirer derrière la nuque.']);
+  X('x_tirhor','Tirage horizontal (poulie basse)','Milieu du dos · biceps',true,['<b>Départ</b> : assis, pieds calés, dos droit, bras tendus.','<b>Mouvement</b> : tire la poignée vers le nombril, serre les omoplates, reviens en contrôlant.','<b>Erreurs</b> : balancer le buste.']);
+  X('x_austr','Rowing australien','Dos · biceps',false,['<b>Départ</b> : sous une barre basse ou une table solide, corps droit, talons au sol.','<b>Mouvement</b> : tire la poitrine vers la barre, redescends bras tendus.','<b>Plus dur</b> : pieds surélevés.']);
+  X('x_chin','Tractions supination (paumes vers toi)','Biceps · dos',false,['<b>Départ</b> : suspendu, mains largeur d\'épaules, paumes vers toi.','<b>Mouvement</b> : monte le menton au-dessus de la barre, redescends bras tendus.','<b>Plus facile</b> : saute en haut et descends en 5 secondes.']);
+  X('x_epm','Développé épaules (machine)','Épaules · triceps',true,['<b>Réglage</b> : poignées à hauteur d\'épaules, dos collé.','<b>Mouvement</b> : pousse vers le haut sans verrouiller, redescends lentement.','<b>Erreurs</b> : cambrer le bas du dos.']);
+  X('x_elevlat','Élévations latérales (haltères)','Épaules (côté)',true,['<b>Départ</b> : debout, haltères le long du corps, coudes un peu fléchis.','<b>Mouvement</b> : monte les bras sur les côtés jusqu\'à hauteur d\'épaules, redescends en 2 secondes.','<b>Erreurs</b> : charge trop lourde, hausser les épaules.']);
+  X('x_facepull','Face pull (poulie)','Arrière des épaules · haut du dos',true,['<b>Départ</b> : corde à hauteur du visage, bras tendus.','<b>Mouvement</b> : tire la corde vers le front en écartant les mains, coudes hauts.','<b>Bon pour</b> : la posture et des épaules solides.']);
+  X('x_pike','Pompes piquées (pike)','Épaules · triceps',false,['<b>Départ</b> : en V inversé, fesses hautes, mains au sol largeur d\'épaules.','<b>Mouvement</b> : descends le sommet de la tête vers le sol entre les mains, pousse.','<b>Plus dur</b> : pieds sur un banc.']);
+  X('x_poirier','Maintien en poirier contre un mur','Épaules · gainage',false,['<b>Départ</b> : mains au sol à 20 cm du mur, monte les pieds contre le mur.','<b>Position</b> : bras tendus, ventre serré, tiens le temps indiqué.','<b>Plus facile</b> : pieds sur une chaise, fesses en l\'air.'],'s');
+  X('x_curl','Curl biceps (haltères ou barre)','Biceps',true,['<b>Départ</b> : debout, coudes collés au corps.','<b>Mouvement</b> : monte la charge vers les épaules, redescends en 2 secondes.','<b>Erreurs</b> : balancer le buste.']);
+  X('x_marteau','Curl marteau (haltères)','Biceps · avant-bras',true,['<b>Départ</b> : haltères le long du corps, paumes face à face.','<b>Mouvement</b> : monte sans tourner les poignets, redescends lentement.','<b>Erreurs</b> : coudes qui avancent.']);
+  X('x_triceps','Extension triceps (poulie)','Triceps',true,['<b>Départ</b> : face à la poulie haute, coudes collés au corps.','<b>Mouvement</b> : tends les bras vers le bas, reviens jusqu\'à 90°.','<b>Erreurs</b> : coudes qui bougent.']);
+  X('x_tricepsh','Extension triceps au-dessus de la tête (haltère)','Triceps',true,['<b>Départ</b> : assis ou debout, un haltère tenu à deux mains au-dessus de la tête.','<b>Mouvement</b> : descends l\'haltère derrière la nuque en pliant les coudes, remonte.','<b>Erreurs</b> : coudes qui s\'écartent.']);
+  X('x_pompdiam','Pompes serrées (diamant)','Triceps · pectoraux',false,['<b>Départ</b> : mains rapprochées sous la poitrine, pouces et index qui se touchent.','<b>Mouvement</b> : descends coudes le long du corps, pousse.','<b>Plus facile</b> : genoux au sol.']);
+  X('x_pompdecl','Pompes pieds surélevés','Haut des pectoraux · épaules',false,['<b>Départ</b> : pieds sur un banc, mains au sol, corps droit.','<b>Mouvement</b> : descends la poitrine vers le sol, pousse.','<b>Erreurs</b> : bassin qui tombe.']);
+  X('x_crunchp','Crunch à la poulie','Abdominaux',true,['<b>Départ</b> : à genoux face à la poulie haute, corde tenue près de la tête.','<b>Mouvement</b> : enroule le buste vers le sol en contractant les abdos, reviens lentement.','<b>Erreurs</b> : tirer avec les bras.']);
+  X('x_crunch','Crunch','Abdominaux',false,['<b>Départ</b> : sur le dos, genoux pliés, mains aux tempes.','<b>Mouvement</b> : décolle les épaules en enroulant le buste, souffle en montant.','<b>Erreurs</b> : tirer sur la nuque.']);
+  X('x_releve','Relevé de jambes (suspendu ou chaise romaine)','Bas des abdominaux',false,['<b>Départ</b> : suspendu à une barre ou en appui sur la chaise romaine.','<b>Mouvement</b> : monte les genoux vers la poitrine sans balancer, redescends lentement.','<b>Plus dur</b> : jambes tendues.']);
+  X('x_russian','Rotations russes','Abdominaux (côtés)',false,['<b>Départ</b> : assis, buste penché en arrière, pieds au sol.','<b>Mouvement</b> : tourne le buste d\'un côté puis de l\'autre, lentement, sans poids au début.','<b>Erreurs</b> : dos rond. Arrête si le bas du dos tire.']);
+  X('x_hollow','Hollow body (coque)','Abdominaux',false,['<b>Position</b> : sur le dos, bas du dos collé au sol, bras et jambes tendus décollés.','<b>Tiens</b> le temps indiqué en respirant.','<b>Plus facile</b> : genoux pliés.'],'s');
+
+  var GROUPES=[['jambes','🦵 Jambes'],['pecs','🫁 Pecs'],['dos','🔙 Dos'],['epaules','🤷 Épaules'],['bras','💪 Bras'],['abdos','🎯 Abdos'],['full','⚡ Corps entier']];
+  var LIB={
+    salle:{jambes:['squat','x_presse','x_legcurl','x_legext','x_mollets'],pecs:['x_dc','x_dih','x_pecdeck','x_dipsm'],dos:['x_tirvert','rowing','x_tirhor','souleve'],epaules:['militaire','x_elevlat','x_facepull','x_epm'],bras:['x_curl','x_triceps','x_marteau','x_dipsm'],abdos:['x_crunchp','x_releve','gainage']},
+    maison:{jambes:['goblet','fentes','souleveh','x_fentesbulg','pont'],pecs:['devsol','pompes','x_pompdecl'],dos:['rowh','souleveh','x_austr'],epaules:['epaulesh','x_elevlat','x_pike'],bras:['x_curl','x_tricepsh','x_marteau','x_pompdiam'],abdos:['gainage','x_crunch','x_russian','grimpeur']},
+    calis:{jambes:['squatpdc','x_fentesbulg','x_pistol','pont','x_mollets_pdc'],pecs:['pompes','x_pompdecl','x_dipsb'],dos:['tractions','x_austr','x_chin'],epaules:['x_pike','x_poirier','pompes'],bras:['x_chin','x_pompdiam','x_dipsb'],abdos:['gainage','x_hollow','x_releve','grimpeur']}};
+  var NOMG={jambes:'Jambes',pecs:'Pecs',dos:'Dos',epaules:'Épaules',bras:'Bras',abdos:'Abdos',full:'Corps entier'};
+
+  /* objectif de répétitions affiché selon le but */
+  /* gros mouvements : là où l'objectif « performances » s'applique (charges lourdes, longs repos) */
+  var BASE={squat:1,x_dc:1,souleve:1,militaire:1,rowing:1,tractions:1,x_presse:1,x_tirvert:1,x_dih:1,x_dipsb:1,x_dipsm:1,x_chin:1,goblet:1,souleveh:1,devsol:1,epaulesh:1,rowh:1,x_tirhor:1,x_epm:1,pompes:1};
+  function cible(k){var e=S.exo(k),b=but(),g=GOAL[b];if(!e)return;e.base=!!BASE[k]||(/^m_/.test(k)&&!!e.poids);
+    if(e.unite==='s'){e.obj=g.series+' fois '+(b==='perf'?'30 à 60':'20 à 45')+' secondes';e.reps=b==='perf'?60:45;return}
+    if(b==='perf'&&!e.base){e.obj='3 séries de 8 à 12 (exercice d\'appoint)';e.reps=12;return}
+    if(!e.poids&&b==='perf'){e.obj=g.series+' séries, au maximum propre (garde 1 à 2 répétitions en réserve)';e.reps=8;return}
+    e.obj=g.series+' séries de '+g.reps;e.reps=g.rN}
+
+  /* ===== Machines de la salle ===== */
+  function machines(){var d=U.db();if(!Array.isArray(d.machines))d.machines=[];return d.machines}
+  function enregistrerMachines(){machines().forEach(function(m){S.ajouter('m_'+m.id,{nom:m.nom,muscles:NOMG[m.groupe]||'Machine',obj:'',reps:10,series:3,poids:m.charge!==false,fiche:['Machine ajoutée par toi. Règle le siège pour que l\'axe de la machine soit aligné avec ton articulation, et garde un mouvement lent et contrôlé.']});cible('m_'+m.id)})}
+
+  /* ===== Modes : programme débutant / routine par muscle / mes machines ===== */
+  var mode=store('cy.mode')||'prog',groupe=store('cy.groupe')||'jambes';
+  function routine(lieu,g){var L=LIB[lieu]||LIB.maison,ks;
+    if(g==='full')ks=[L.jambes[0],L.pecs[0],L.dos[0],L.epaules[0],L.abdos[0]];
+    else{ks=(L[g]||[]).slice(0,4);if(lieu==='salle'){var mine=machines().filter(function(m){return !m.archive&&m.groupe===g}).map(function(m){return 'm_'+m.id});ks=mine.concat(ks.filter(function(k){return mine.indexOf(k)<0})).slice(0,5)}}
+    var vu={};return ks.filter(function(k){if(vu[k]||!S.exo(k))return false;vu[k]=1;return true})}
+  function appliquer(){enregistrerMachines();var lieu=S.lieu(),g=GOAL[but()];S.cles().forEach(cible);if(mode==='mach'&&lieu!=='salle')mode='prog';
+    if(mode==='rout'){var ks=routine(lieu,groupe);ks.forEach(cible);S.custom({court:NOMG[groupe],titre:'Routine '+NOMG[groupe]+' · '+S.nomLieu()+' · '+g.series+' séries de '+g.reps+' · repos '+fmtS(g.repos),k:ks})}
+    else if(mode==='mach'){var km=machines().filter(function(m){return !m.archive}).map(function(m){return 'm_'+m.id});km.forEach(cible);S.custom({court:'machines',titre:km.length?'Mes machines · '+km.length+' machine'+(km.length>1?'s':''):'Mes machines : ajoute ta première machine ci-dessous',k:km})}
+    else S.custom(null);
+    dessinerMode()}
+  function dessinerMode(){var z=$('entrMode');if(!z)return;var lieu=S.lieu();
+    var M=[['prog','Programme débutant'],['rout','Routine par muscle']];if(lieu==='salle')M.push(['mach','Mes machines']);
+    var h='<div class="lbl" style="margin-top:12px">Que veux-tu faire ?</div><div class="chips" role="group" aria-label="Type de séance">'+M.map(function(m){return '<button data-emode="'+m[0]+'" aria-pressed="'+(mode===m[0])+'">'+m[1]+'</button>'}).join('')+'</div>';
+    if(mode==='rout')h+='<div class="lbl" style="margin-top:10px">Quel muscle ?</div><div class="chips" role="group" aria-label="Muscle à travailler">'+GROUPES.map(function(g){return '<button data-egr="'+g[0]+'" aria-pressed="'+(groupe===g[0])+'">'+g[1]+'</button>'}).join('')+'</div><div class="est" style="margin-top:6px">Routine réglée pour ton objectif : <b>'+esc(GOAL[but()].nom)+'</b>.'+(butChoisi()?'':' <button class="lien" data-v="histo">Choisir mon objectif</button>')+'</div>';
+    if(mode==='mach'){var ms=machines().filter(function(m){return !m.archive});
+      h+='<ul style="margin-top:8px">'+ms.map(function(m){return '<li><span>'+esc(m.nom)+' <span class="est">· '+esc(NOMG[m.groupe]||'')+(m.charge===false?' · sans charge':'')+'</span></span><button data-emdel="'+m.id+'" aria-label="Retirer la machine '+esc(m.nom)+'">✕</button></li>'}).join('')+'</ul>'+
+        '<form id="emForm" style="margin-top:8px"><label for="emNom">Nom de la machine</label><input id="emNom" placeholder="Ex. : presse à cuisses, poulie haute…" autocomplete="off" maxlength="40">'+
+        '<div class="row" style="margin-top:8px"><select id="emGr" aria-label="Muscle travaillé">'+GROUPES.filter(function(g){return g[0]!=='full'}).map(function(g){return '<option value="'+g[0]+'">'+g[1].replace(/^\S+ /,'')+'</option>'}).join('')+'</select>'+
+        '<label style="display:flex;gap:8px;align-items:center;margin:0;color:var(--ink);font-size:15px;min-height:44px;flex:0 0 auto"><input type="checkbox" id="emCh" checked> avec charge</label></div>'+
+        '<button class="main" type="submit" style="margin-top:8px">Ajouter la machine</button></form><div class="est" style="margin-top:6px">Pour chaque machine, tu notes la charge et les répétitions de chaque série. Elles servent aussi dans « Routine par muscle ».</div>'}
+    z.innerHTML=h;var pc=$('progChoix');if(pc)pc.classList.toggle('hide',mode!=='prog');
+    var f=$('emForm');if(f)f.onsubmit=function(e){e.preventDefault();var n=$('emNom').value.trim();if(!n){toast('Donne un nom à la machine');return}
+      machines().push({id:Date.now().toString(36),nom:n.slice(0,40),groupe:$('emGr').value,charge:$('emCh').checked});U.save();enregistrerMachines();appliquer();toast('Machine ajoutée')}}
+  document.addEventListener('click',function(ev){var b=ev.target.closest&&ev.target.closest('[data-emode],[data-egr],[data-emdel],[data-lieu]');if(!b)return;var d=b.dataset;
+    if(d.emode){mode=d.emode;store('cy.mode',mode);$('exoCard').classList.add('hide')}
+    if(d.egr){groupe=d.egr;store('cy.groupe',groupe);$('exoCard').classList.add('hide')}
+    if(d.emdel){machines().forEach(function(m){if(m.id===d.emdel)m.archive=true});U.save()}
+    appliquer()});
+
+  /* ===== Réglage de la séance : séries + repos ===== */
+  function fmtS(s){s=Math.round(s);return s<60?s+' s':Math.floor(s/60)+' min'+(s%60?' '+String(s%60).padStart(2,'0'):'')}
+  function cfg(){var d=U.db(),g=GOAL[but()];if(!d.seanceCfg||typeof d.seanceCfg!=='object')d.seanceCfg={};var c=d.seanceCfg;
+    c.series=Math.round(+c.series);c.repos=Math.round(+c.repos);c.meme=c.meme!==false;if(!(c.series>=1&&c.series<=12))c.series=g.series;if(!(c.repos>=10&&c.repos<=600))c.repos=g.repos;if(!Array.isArray(c.liste))c.liste=[];c.liste=c.liste.map(function(x){x=Math.round(+x);return x>=10&&x<=600?x:0});return c}
+  function reposApres(n){var c=cfg();return c.meme?c.repos:(+c.liste[n-1]||c.repos)}
+  window.CYchrono={series:function(){return cfg().series},arreter:function(){arreter()}};
+  var sheetOuvert=false,apresSheet=null;
+  function sheet(){var c=cfg(),g=GOAL[but()],tmp={series:c.series,meme:c.meme,repos:c.repos,liste:c.liste.slice()},avant=document.activeElement;sheetOuvert=true;
+    var o=document.createElement('div');o.className='voile';o.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"></div>';document.body.appendChild(o);var s=o.firstChild;
+    document.querySelector('main').inert=true;document.querySelector('nav').inert=true;
+    function fermer(ok){if(ok){c.series=tmp.series;c.meme=tmp.meme;c.repos=tmp.repos;c.liste=tmp.liste.slice(0,tmp.series-1);c.jour=U.cle();U.save();toast(c.series+' séries · repos '+(c.meme?fmtS(c.repos):'personnalisé'))}
+      document.querySelector('main').inert=false;document.querySelector('nav').inert=false;o.remove();sheetOuvert=false;try{if(avant&&document.contains(avant)&&avant.focus)avant.focus({preventScroll:true})}catch(e){}majLigne();S.rendre();var f=apresSheet;apresSheet=null;if(ok&&f)f()}
+    function dessin(){var R=[30,45,60,90,120,180];
+      s.innerHTML='<div class="poignee" aria-hidden="true"></div><h2 class="rt" id="shT" style="margin:0">Avant de commencer</h2><div class="est">Conseillé pour <b>'+esc(g.nom)+'</b> : '+g.series+' séries de '+g.reps+', '+fmtS(g.repos)+' de repos. <button class="lien" id="shCons">Prendre ce réglage</button></div>'+
+        '<div class="lbl" style="margin-top:14px">Combien de séries par exercice ?</div><div class="chips" role="group" aria-label="Nombre de séries">'+[2,3,4,5,6].map(function(n){return '<button data-shs="'+n+'" aria-pressed="'+(tmp.series===n)+'">'+n+'</button>'}).join('')+'<input id="shSAutre" type="number" inputmode="numeric" min="1" max="12" placeholder="Autre" aria-label="Autre nombre de séries (1 à 12)" style="width:96px;flex:0 0 auto;min-height:44px" value="'+([2,3,4,5,6].indexOf(tmp.series)<0?tmp.series:'')+'"></div>'+
+        '<div class="lbl" style="margin-top:14px">Chrono de repos entre les séries</div><div class="seg" role="group" aria-label="Type de repos" style="margin:6px 0 8px"><button data-shm="1" aria-pressed="'+tmp.meme+'">Le même à chaque fois</button><button data-shm="0" aria-pressed="'+(!tmp.meme)+'">Différent à chaque série</button></div>'+
+        (tmp.meme?'<div class="chips" role="group" aria-label="Durée du repos">'+R.map(function(r){return '<button data-shr="'+r+'" aria-pressed="'+(tmp.repos===r)+'">'+fmtS(r)+'</button>'}).join('')+'<input id="shRAutre" type="number" inputmode="numeric" min="10" max="600" placeholder="Autre (s)" aria-label="Autre durée de repos en secondes" style="width:110px;flex:0 0 auto;min-height:44px" value="'+(R.indexOf(tmp.repos)<0?tmp.repos:'')+'"></div>'
+          :(tmp.series<2?'<div class="est">Une seule série : pas de repos à régler.</div>':'<ul>'+Array.from({length:tmp.series-1},function(_,i){return '<li style="align-items:center"><label for="shL'+i+'" style="margin:0;color:var(--ink);font-size:15px">Après la série '+(i+1)+'</label><span style="display:flex;align-items:center;gap:6px;flex:0 0 auto"><input id="shL'+i+'" data-shl="'+i+'" type="number" inputmode="numeric" min="10" max="600" value="'+(+tmp.liste[i]||tmp.repos)+'" style="width:90px;min-height:44px"> s</span></li>'}).join('')+'</ul>'))+
+        (but()==='perf'?'<div class="est" style="margin-top:10px">Avant les séries lourdes, fais 2 séries d\'échauffement légères (non comptées).</div>':'')+'<div class="est" style="margin-top:10px">Sur iPhone, le chrono ne sonne pas écran verrouillé : garde l\'écran allumé pendant le repos.</div><button class="main" id="shOk" style="margin-top:16px">C\'est parti</button><button class="lien" id="shNon" style="display:block;margin:6px auto 0">Annuler</button>';
+      s.querySelectorAll('[data-shs]').forEach(function(b){b.onclick=function(){tmp.series=+b.dataset.shs;dessin()}});
+      s.querySelectorAll('[data-shr]').forEach(function(b){b.onclick=function(){tmp.repos=+b.dataset.shr;dessin()}});
+      s.querySelectorAll('[data-shm]').forEach(function(b){b.onclick=function(){tmp.meme=b.dataset.shm==='1';dessin()}});
+      s.querySelectorAll('[data-shl]').forEach(function(i){i.onchange=function(){var v=Math.round(+i.value);if(v>=10&&v<=600)tmp.liste[+i.dataset.shl]=v;else{i.value=+tmp.liste[+i.dataset.shl]||tmp.repos;toast('Entre 10 et 600 secondes')}}});
+      /* champs « Autre » : on garde la valeur sans redessiner (sinon le premier appui sur « C'est parti » est perdu) */
+      var sa=$('shSAutre');if(sa){sa.oninput=function(){var v=Math.round(+sa.value);if(v>=1&&v<=12)tmp.series=v};sa.onchange=function(){var v=Math.round(+sa.value);if(!(v>=1&&v<=12)){sa.value='';toast('Entre 1 et 12 séries')}};sa.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();sa.onchange();dessin()}}}
+      var ra=$('shRAutre');if(ra){ra.oninput=function(){var v=Math.round(+ra.value);if(v>=10&&v<=600)tmp.repos=v};ra.onchange=function(){var v=Math.round(+ra.value);if(!(v>=10&&v<=600)){ra.value='';toast('Entre 10 et 600 secondes')}}}
+      $('shCons').onclick=function(){tmp.series=g.series;tmp.repos=g.repos;tmp.meme=true;dessin()};
+      $('shOk').onclick=function(){s.querySelectorAll('[data-shl]').forEach(function(i){var v=Math.round(+i.value);if(v>=10&&v<=600)tmp.liste[+i.dataset.shl]=v});fermer(true)};$('shNon').onclick=function(){fermer(false)}}
+    o.addEventListener('click',function(e){if(e.target===o)fermer(false)});o.addEventListener('keydown',function(e){if(e.key==='Escape')fermer(false)});
+    dessin();var h=$('shT');h.setAttribute('tabindex','-1');h.focus()}
+  function majLigne(){var l=$('cfgLigne');if(!l)return;var c=cfg();l.innerHTML='⏱ '+c.series+' séries · repos '+(c.meme?fmtS(c.repos):Array.from({length:Math.max(0,c.series-1)},function(_,i){return fmtS(reposApres(i+1))}).join(' / ')||'—')+' <button class="lien" id="cfgMod">Modifier</button>';$('cfgMod').onclick=function(){sheet()}}
+  /* à l'ouverture d'un exercice : réglage demandé une fois par jour */
+  S.surOuvrir(function(){majLigne();suite();if(cfg().jour!==U.cle()&&!sheetOuvert)sheet()});
+
+  /* ===== Chrono de repos ===== */
+  var ac=null,fin=0,total=0,lbl='',iv=null,dernierBip=-1,wl=null;
+  function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
+  function bip(f,ms){try{audio();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=0.2;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
+  function eveil(on){try{if(on&&navigator.wakeLock&&!wl)navigator.wakeLock.request('screen').then(function(x){wl=x;x.addEventListener('release',function(){wl=null})}).catch(function(){});if(!on&&wl){wl.release();wl=null}}catch(e){}}
+  function lancer(sec,texte){audio();try{if('Notification' in window&&Notification.permission==='default'&&!store('cy.notifDemande')){store('cy.notifDemande','1');Notification.requestPermission()}}catch(e){}fin=Date.now()+sec*1000;total=sec;lbl=texte;dernierBip=-1;$('chrono').classList.remove('hide');document.body.classList.add('avecChrono');$('chLbl').textContent=texte;eveil(true);clearInterval(iv);iv=setInterval(tick,250);tick()}
+  function arreter(){clearInterval(iv);iv=null;fin=0;$('chrono').classList.add('hide');document.body.classList.remove('avecChrono');eveil(false)}
+  function tick(){var r=Math.max(0,Math.ceil((fin-Date.now())/1000));$('chT').textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');$('chBar').style.width=(total?(1-r/total)*100:0)+'%';
+    if(r<=3&&r>0&&r!==dernierBip){dernierBip=r;bip(660,120)}
+    if(r<=0){clearInterval(iv);iv=null;bip(990,500);if(navigator.vibrate)navigator.vibrate([200,100,200]);$('chT').textContent='C\'est parti !';$('chBar').style.width='100%';
+      if(document.hidden){try{if('Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:'Repos terminé : '+lbl.replace(/^Repos · /,''),icon:'icon-192.png',tag:'repos'})})}catch(e){}}
+      toast('Repos terminé : c\'est parti !',2500);setTimeout(function(){if(!iv)arreter()},4000)}}
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&iv){eveil(true);tick()}});
+  /* série supprimée pendant le repos : on arrête le chrono (le libellé ne serait plus juste) */
+  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-dels2]')){if(iv)arreter();suite()}});
+  $('chMoins').onclick=function(){if(iv){fin-=15000;tick()}};$('chPlus').onclick=function(){if(iv){fin+=15000;total+=15;tick()}};$('chPasser').onclick=arreter;
+  $('reposBtn').onclick=function(){var n=nbFaites(S.courant());lancer(reposApres(Math.max(1,n)),'Repos')};
+  function nbFaites(k){return (U.jour().series||[]).filter(function(x){return x.exo===k}).length}
+  function prochain(){var L=S.liste(),c=cfg(),cur=S.courant(),i=L.indexOf(cur);for(var j=1;j<=L.length;j++){var k=L[(i+j)%L.length];if(k!==cur&&nbFaites(k)<c.series)return k}return null}
+  function suite(){var z=$('exoSuite');if(!z)return;var k=S.courant(),c=cfg(),n=nbFaites(k);
+    if(k&&n>=c.series){var p=prochain();z.innerHTML='<div style="margin-top:10px;padding:12px;border-radius:14px;background:var(--fresh2);color:var(--fresh);font-weight:600">Exercice terminé ✓ '+n+' séries</div>'+(p?'<button class="main" data-exo="'+p+'" style="margin-top:8px">Exercice suivant : '+esc(S.exo(p).nom.split(' (')[0])+'</button>':'<div class="est" style="margin-top:8px">Tous les exercices sont faits. Appuie sur « Terminer la séance » plus bas.</div>')}
+    else z.innerHTML=k?'<div class="est" style="margin-top:6px">Série '+Math.min(n+1,c.series)+' sur '+c.series+'</div>':''}
+  S.surSerie(function(k){var c=cfg(),n=nbFaites(k);suite();
+    if(n<c.series)lancer(reposApres(n),'Repos · ensuite : série '+(n+1)+' sur '+c.series);
+    else{var p=prochain();if(p)lancer(reposApres(Math.max(1,c.series-1)),'Repos · ensuite : '+S.exo(p).nom.split(' (')[0]);toast('Exercice terminé ✓',2400)}});
+  /* débloque le son sur iPhone au premier appui */
+  document.addEventListener('touchend',function u(){audio();document.removeEventListener('touchend',u)},{once:true});
+
+  /* données importées : on reprend les machines si elles ont changé */
+  var sigM='';var av=window.CYvivant;window.CYvivant=function(){if(av)av();var s=JSON.stringify(machines());if(s!==sigM){sigM=s;appliquer()}};
+  var pb=$('pBut');if(pb)pb.addEventListener('change',function(){setTimeout(appliquer,0)});
+  enregistrerMachines();appliquer();sigM=JSON.stringify(machines());
+})();
