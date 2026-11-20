@@ -140,7 +140,8 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
 <main>
   <div class="entete">
     <div><div class="date" id="hDate"></div><h1 id="hTitre">Salut !</h1></div>
-    <button class="iconbtn" data-v="regl" aria-label="Réglages"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="pointer-events:none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 4.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button>
+    <div style="display:flex;gap:8px;align-items:center"><button class="lien" id="hCompte" style="min-height:44px;padding:0 4px">Compte</button>
+    <button class="iconbtn" data-v="regl" aria-label="Réglages"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="pointer-events:none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 4.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button></div>
   </div>
 
   <!-- AUJOURD'HUI -->
@@ -400,6 +401,10 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
 
   <!-- RÉGLAGES -->
   <section id="v-regl" class="hide">
+    <div class="card" id="cCarte">
+      <div class="lbl" style="font-weight:600;color:var(--ink)">Mon compte</div>
+      <div id="cZone" style="margin-top:6px"></div>
+    </div>
     <div class="card">
       <label for="rPoids">Ton poids (kg) — sert seulement aux estimations</label>
       <input id="rPoids" type="number" inputmode="decimal" value="75">
@@ -428,10 +433,6 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
       <label for="pBut">Mon but</label>
       <select id="pBut"><option value="0">Augmenter mes performances</option><option value="300">Prendre du muscle</option><option value="-400">Perdre du poids</option><option value="-300">Sécher</option></select>
       <small class="est" style="display:block;margin-top:8px">Calcul : formule de Mifflin-St Jeor × niveau d'activité du travail. Les séances de sport s'ajoutent en plus. C'est une estimation, pas un avis médical.</small>
-    </div>
-    <div class="card">
-      <div class="lbl" style="font-weight:600;color:var(--ink)">Mon compte</div>
-      <div id="cZone" style="margin-top:6px"></div>
     </div>
     <div class="card">
       <div class="lbl">Inviter des amis</div>
@@ -1112,7 +1113,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
       setTimeout(function(){o.remove();document.querySelector('nav [data-v="jour"]').focus();if(rep.attente){var t=document.getElementById('toast');t.textContent=rep.attente;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},7000)}},rep.but==='perf'?3000:1800)}
     function dessin(){
       var tete='<div style="display:flex;justify-content:space-between;align-items:center"><div class="points" role="img" aria-label="Étape '+(etape+1)+' sur 2"><i class="on"></i><i class="'+(etape>=1?'on':'')+'"></i></div>'+
-        (etape===0?(window.CY_CONFIG&&window.CY_CONFIG.supabaseUrl?'<button class="lien" id="onbCo" style="color:var(--acc-ink)">J\'ai déjà un compte</button>':''):'<button class="lien" id="onbRetour" style="color:var(--acc-ink)">← Retour</button>')+'</div>';
+        (etape===0?(window.CY_CONFIG&&window.CY_CONFIG.supabaseUrl?'<span style="display:flex;gap:14px"><button class="lien" id="onbCo" style="color:var(--acc-ink)">Se connecter</button><button class="lien" id="onbIns" style="color:var(--acc-ink)">Créer un compte</button></span>':''):'<button class="lien" id="onbRetour" style="color:var(--acc-ink)">← Retour</button>')+'</div>';
       if(etape===0){
         o.innerHTML=tete+'<svg width="64" height="64" viewBox="0 0 48 48" aria-hidden="true" style="align-self:center;flex:0 0 auto"><path d="M6 24h36c0 10-8 17-18 17S6 34 6 24z" fill="var(--acc)"/><path class="fume" d="M17 8c-3 4 3 6 0 10M24 6c-3 4 3 6 0 10M31 8c-3 4 3 6 0 10" fill="none" stroke="var(--acc)" stroke-width="2.8" stroke-linecap="round"/></svg>'+
           '<div style="text-align:center"><h1 id="onbT" style="font-size:30px;margin:0">Salut ! Ton objectif ?</h1><div class="est" style="font-size:16px;margin-top:6px">Tu pourras le changer quand tu veux.</div></div>'+
@@ -1123,7 +1124,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
           if(bt.dataset.obj2==='secher'&&!rep.secherOk){var zone=o.querySelector('.objs');zone.outerHTML='<div class="card" role="group" aria-labelledby="qSech" style="margin:0"><b id="qSech">Tu t\'entraînes depuis plus de 3 mois ?</b><p class="est" style="margin:6px 0 10px">Sécher demande déjà une bonne base. Sinon, « Perdre du poids » est plus adapté pour commencer.</p><div class="row"><button class="main" id="qOui" style="padding:12px">Oui</button><button id="qNon" style="flex:0 0 auto">Non, plutôt perdre du poids</button></div></div>';
             $('qOui').onclick=function(){rep.secherOk=1;rep.but='secher';etape=1;dessin()};$('qNon').onclick=function(){rep.but='perdre';etape=1;dessin()};$('qOui').focus();return}
           rep.but=bt.dataset.obj2;o.querySelectorAll('[data-obj2]').forEach(function(z){z.setAttribute('aria-pressed',z===bt)});if(navigator.vibrate)navigator.vibrate(10);setTimeout(function(){etape=1;dessin()},250)}});
-        if($('onbCo'))$('onbCo').onclick=function(){ecranCompte('co')};
+        if($('onbCo'))$('onbCo').onclick=function(){ecranCompte('co')};if($('onbIns'))$('onbIns').onclick=function(){ecranCompte('ins')};
       } else {
         o.innerHTML=tete+'<div style="text-align:center;margin-top:24px"><h1 id="onbT" style="font-size:30px;margin:0">Tu t\'entraînes où ?</h1><div class="est" style="font-size:16px;margin-top:6px">Ta séance s\'adapte à ton matériel.</div></div>'+
           '<div style="display:flex;flex-direction:column;gap:10px" role="group" aria-labelledby="onbT">'+LIEUX2.map(function(x){return '<button class="choix" data-lieu2="'+x[0]+'"><span aria-hidden="true" style="font-size:22px;margin-right:10px">'+x[1]+'</span><b>'+x[2]+'</b> <span class="est">· '+x[3]+'</span></button>'}).join('')+'</div>'+
@@ -1201,6 +1202,12 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
 })();
 </script>
 <script src="compte.js"></script>
+<script>
+/* Bouton « Compte » de l'en-tête : ouvre Réglages sur le bloc compte (création proposée si pas connecté). */
+(function(){var b=document.getElementById('hCompte');if(!b)return;function maj(){var c=window.CYcompte;b.hidden=!(c&&c.actif());b.textContent=c&&c.connecte()?'Mon compte':'Créer un compte'}
+  b.onclick=function(){var r=document.querySelector('.iconbtn[data-v="regl"]');if(r)r.click();var c=window.CYcompte;if(c&&!c.connecte()){var i=document.getElementById('cVueIns');if(i)i.click()}var k=document.getElementById('cCarte');if(k)k.scrollIntoView({block:'start'})};
+  maj();setInterval(maj,3000)})();
+</script>
 <script src="entrainement.js"></script>
 <script src="bilan.js"></script>
 <script>
