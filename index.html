@@ -37,6 +37,7 @@ ol.et{padding-left:20px;margin:8px 0 0}ol.et li{display:list-item;border:0;paddi
 a{color:var(--acc)}
 /* Accessibilité : focus visible, touches d'au moins 44 px, texte caché pour lecteur d'écran */
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.chips button[aria-pressed="true"]{background:var(--acc);color:var(--card)}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 nav button{min-height:48px;border-top:3px solid transparent;border-radius:0}nav button.on{border-top-color:var(--acc)}
 .chips button{min-height:44px}li button{min-width:44px;min-height:44px;padding:6px 12px}
@@ -188,7 +189,9 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       <div class="est" id="gJoker" style="margin-top:2px"></div>
       <div class="bar" aria-hidden="true" style="margin:8px 0 12px"><i id="gXpBar" style="width:0"></i></div>
       <div class="lbl">Objectif de la semaine</div>
-      <div class="chips" role="group" aria-label="Nombre de séances visées par semaine" style="margin-top:6px"><button data-obj="2">2 séances</button><button data-obj="3">3 séances</button><button data-obj="4">4 séances</button></div>
+      <div class="chips" role="group" aria-label="Nombre de séances visées par semaine" style="margin-top:6px"><button data-obj="2">2 séances</button><button data-obj="3">3 séances</button><button data-obj="4">4 séances</button><button data-obj="5">5 séances</button></div>
+      <form id="gObjForm" class="row" style="margin-top:6px"><input id="gObjAutre" type="number" inputmode="numeric" min="1" max="14" step="1" style="min-height:44px;font-size:16px" aria-label="Autre nombre de séances par semaine (1 à 14)" placeholder="Autre nombre (1 à 14)"><button id="gObjOk" type="submit" style="flex:0 0 auto;min-height:44px">Valider</button></form>
+      <div class="est" id="gObjActuel" aria-live="polite" style="margin-top:4px"></div>
       <div id="gSemaine" style="display:flex;gap:6px;margin:8px 0"></div>
       <div class="est" id="gSemaineTxt"></div>
       <div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--soft)">
@@ -714,7 +717,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   var NIV=['Apprenti','Motivé','Régulier','Athlète','Machine','Légende'];
   var BADGES=[['s1','🎉','Première séance',function(s){return[s.s,1]}],['sem','📅','Objectif de la semaine atteint',function(s){return[s.semS,s.obj]}],['d5','⚡','5 défis du jour',function(s){return[s.d,5]}],['r7','🔥','7 jours de suite',function(s){return[s.sr,7]}],['s10','💪','10 séances',function(s){return[s.s,10]}],['maison','🏠','Première séance maison',function(s){return[s.lieux.Maison?1:0,1]}],['calis','🌳','Première séance callisthénie',function(s){return[s.lieux['Callisthénie']?1:0,1]}],['p100','🧱','100 séries notées',function(s){return[s.p,100]}],['s30','🏅','30 séances',function(s){return[s.s,30]}],['r30','🌟','30 jours de suite',function(s){return[s.sr,30]}]];
   var JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
-  function G(){var d=U.db();if(!d.gam||typeof d.gam!=='object')d.gam={};var g=d.gam;if(!g.defis||typeof g.defis!=='object')g.defis={};if(!g.vus||typeof g.vus!=='object')g.vus={};if([2,3,4].indexOf(+g.objSemaine)<0)g.objSemaine=3;g.objSemaine=+g.objSemaine;return g}
+  function G(){var d=U.db();if(!d.gam||typeof d.gam!=='object')d.gam={};var g=d.gam;if(!g.defis||typeof g.defis!=='object')g.defis={};if(!g.vus||typeof g.vus!=='object')g.vus={};g.objSemaine=Math.round(+g.objSemaine);if(!(g.objSemaine>=1&&g.objSemaine<=14))g.objSemaine=3;return g}
   function cle(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
   function aujD(){var t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
   function fini(j){return !!(j&&(j.seances||[]).length)}
@@ -741,12 +744,12 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   var dejaFete={};
   function feter(t,cle){if(cle){if(dejaFete[cle])return;dejaFete[cle]=1}var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(feter.t);feter.t=setTimeout(function(){e.classList.remove('on')},3500);if(navigator.vibrate)navigator.vibrate([60,40,60,40,120])}
   window.CYgam=function(){if(!$('gamCard'))return;var g=G(),sr=serie(),st=stats(),sem=semaine(),auj=cle(aujD()),jAuj=U.db().jours[auj],fait=actif(auj);
-    var semS=sem.filter(function(x){return x.s}).length;st.sr=sr.n;st.semS=semS;st.obj=g.objSemaine;
+    var semS=sem.reduce(function(t,x){var j=U.db().jours[x.k];return t+((j&&j.seances)||[]).length},0);st.sr=sr.n;st.semS=semS;st.obj=g.objSemaine;
     $('gSerieBloc').innerHTML=sr.n?'<span aria-hidden="true">🔥</span> '+sr.n+' <span style="font-size:18px">'+(sr.n>1?'jours':'jour')+'</span>':'<span style="font-size:22px">Lance ta série aujourd\'hui 💪</span>';
     $('gEtat').innerHTML=fait?'Journée validée ✓ Reviens demain pour passer à '+(sr.n+1)+'.':(sr.n?'<b>Ta série de '+sr.n+' jour'+(sr.n>1?'s':'')+' s\'arrête ce soir</b> : fais ta séance ou le défi (2 minutes).':'Fais ta séance ou le défi du jour pour commencer.');
     $('gJoker').textContent=sr.jokerUtilise?'🛡️ Joker utilisé cette semaine (il revient lundi)':'🛡️ Joker disponible : il protège ta série si tu oublies un jour cette semaine';
     var nv=niveau(st.pts);$('gNiveau').textContent='Niveau '+nv.n+' · '+nv.nom;$('gXp').textContent=st.pts+' points · prochain niveau à '+nv.haut;$('gXpBar').style.width=Math.min(100,(st.pts-nv.bas)/(nv.haut-nv.bas)*100)+'%';
-    document.querySelectorAll('[data-obj]').forEach(function(b){var on=+b.dataset.obj===g.objSemaine;b.style.fontWeight=on?'700':'400';b.setAttribute('aria-pressed',on)});
+    document.querySelectorAll('[data-obj]').forEach(function(b){b.setAttribute('aria-pressed',+b.dataset.obj===g.objSemaine)});$('gObjActuel').textContent='Ton objectif : '+g.objSemaine+' séance'+(g.objSemaine>1?'s':'')+' par semaine'+(g.objSemaine>=6?'. Beaucoup de séances : alterne les muscles travaillés et garde des séances légères.':'.');
     $('gSemaine').innerHTML=sem.map(function(x){var etat=x.s?'séance faite':x.e?'séries notées':x.d?'défi fait':x.joker?'sauvé par le joker':x.futur?'à venir':x.auj?'pas encore fait':'rien',
       bg=x.s?'var(--acc)':x.e||x.d?'#f59e0b':'transparent',fg=x.s?'var(--card)':x.e||x.d?'#1c2321':'inherit',ic=x.joker?'🛡️':x.nom[0].toUpperCase();
       return '<span style="flex:1;text-align:center;padding:8px 0;border-radius:10px;font-weight:700;border:2px solid '+(x.auj?'currentColor':'rgba(127,127,127,.45)')+';background:'+bg+';color:'+fg+'"><span aria-hidden="true">'+ic+'</span><span class="sr">'+x.nom+' : '+etat+'</span></span>'}).join('');
@@ -762,7 +765,9 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     $('gProchain').textContent=prochain?'Prochain : '+prochain.b[1]+' '+prochain.b[2]+' ('+Math.min(prochain.v[0],prochain.v[1])+'/'+prochain.v[1]+')':'Tous les badges sont gagnés. Champion !';
     $('gBadgesTous').innerHTML=BADGES.map(function(b){return pastille(b,!!g.vus[b[0]])}).join('');
     if(nouveaux.length){try{localStorage.setItem('ungeste.v1',JSON.stringify(U.db()))}catch(e){}feter('Nouveau badge : '+nouveaux.map(function(b){return b[1]+' '+b[2]}).join(', ')+' !')}};
-  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-obj]');if(b){G().objSemaine=+b.dataset.obj;U.save()}});
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-obj]');if(b){choisirObj(+b.dataset.obj)}});
+  function choisirObj(v){G().objSemaine=v;U.save();feter('Objectif : '+v+' séance'+(v>1?'s':'')+' par semaine. C\'est parti !')}
+  $('gObjForm').onsubmit=function(e){e.preventDefault();var v=Number($('gObjAutre').value);if(Number.isInteger(v)&&v>=1&&v<=14){$('gObjAutre').value='';choisirObj(v)}else feter('Choisis un nombre entier entre 1 et 14')};
   /* minuit / retour sur l'appli : on recalcule */
   document.addEventListener('visibilitychange',function(){if(!document.hidden)window.CYgam()});setInterval(function(){if(!document.hidden)window.CYgam()},60000);
   window.CYgam();
