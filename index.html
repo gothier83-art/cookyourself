@@ -171,7 +171,9 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   <!-- SÉANCE -->
   <section id="v-seance" class="hide">
     <div class="card">
-      <div class="lbl">Programme débutant · 3 séances par semaine (A, B, A puis B, A, B…)</div>
+      <div class="lbl">Où t'entraînes-tu ?</div>
+      <div class="chips" role="group" aria-label="Lieu d'entraînement" style="margin-top:8px"><button data-lieu="maison">🏠 Maison (haltères)</button><button data-lieu="calis">🌳 Callisthénie</button><button data-lieu="salle">🏋️ Salle</button></div>
+      <div class="lbl" style="margin-top:12px">Programme débutant · <span id="lieuNom"></span> · 3 séances par semaine (A, B, A puis B, A, B…)</div>
       <div class="chips" id="progChoix" style="margin-top:8px"><button data-prog="A">Séance A</button><button data-prog="B">Séance B</button></div>
       <ul id="progListe"></ul>
       <div class="est" id="progInfo" style="margin-top:6px"></div>
@@ -507,7 +509,24 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     militaire:{nom:'Développé militaire (épaules)',muscles:'Épaules · triceps',obj:'3 séries de 10',reps:10,series:3,poids:true,
       fiche:['<b>Départ</b> : debout, ventre et fessiers serrés, charge à hauteur d\'épaules.','<b>Mouvement</b> : pousse au-dessus de la tête, la tête passe « sous » la barre, redescends en contrôlant.','<b>Erreurs</b> : cambrer fort le bas du dos.']}
   };
-  var PROG={A:['squat','pompes','rowing','gainage'],B:['souleve','militaire','rowing','gainage']};
+  /* Exercices en plus pour la maison (haltères) et la callisthénie (poids du corps). */
+  var X=function(nom,muscles,obj,reps,poids,fiche,unite){return{nom:nom,muscles:muscles,obj:obj,reps:reps,series:3,poids:poids,fiche:fiche,unite:unite}};
+  EXOS.goblet=X('Squat gobelet (un haltère)','Cuisses · fessiers','3 séries de 12',12,true,['<b>Départ</b> : un haltère tenu vertical contre la poitrine, pieds largeur d\'épaules.','<b>Mouvement</b> : descends comme pour t\'asseoir, coudes entre les genoux, remonte en poussant dans les talons.','<b>Erreurs</b> : dos rond, talons qui décollent.']);
+  EXOS.fentes=X('Fentes alternées','Cuisses · fessiers · équilibre','3 séries de 10 par jambe',10,true,['<b>Départ</b> : debout, haltères le long du corps (ou sans charge).','<b>Mouvement</b> : un grand pas en avant, descends jusqu\'à ce que le genou arrière frôle le sol, reviens. Change de jambe.','<b>Erreurs</b> : genou avant qui rentre vers l\'intérieur, buste penché.']);
+  EXOS.rowh=X('Rowing un bras (haltère)','Dos · biceps','3 séries de 10 par bras',10,true,['<b>Départ</b> : une main et un genou sur une chaise ou un banc, dos plat.','<b>Mouvement</b> : tire l\'haltère vers la hanche, coude près du corps, redescends lentement.','<b>Erreurs</b> : tourner le buste, dos rond.']);
+  EXOS.devsol=X('Développé haltères au sol','Pectoraux · triceps','3 séries de 10',10,true,['<b>Départ</b> : allongé sur le dos, genoux pliés, haltères au-dessus de la poitrine.','<b>Mouvement</b> : descends jusqu\'à ce que les coudes touchent le sol, puis pousse.','<b>Erreurs</b> : coudes à 90° du corps (garde-les à environ 45°).']);
+  EXOS.souleveh=X('Soulevé de terre jambes tendues (haltères)','Arrière des cuisses · fessiers','3 séries de 10',10,true,['<b>Départ</b> : debout, haltères devant les cuisses, genoux un peu fléchis.','<b>Mouvement</b> : penche le buste en poussant les fesses en arrière, haltères près des jambes, remonte en serrant les fessiers.','<b>Erreurs</b> : <b>dos rond</b>. Commence léger.']);
+  EXOS.epaulesh=X('Développé épaules assis (haltères)','Épaules · triceps','3 séries de 10',10,true,['<b>Départ</b> : assis sur une chaise, dos droit, haltères à hauteur d\'oreilles.','<b>Mouvement</b> : pousse au-dessus de la tête, redescends en contrôlant.','<b>Erreurs</b> : cambrer le bas du dos.']);
+  EXOS.squatpdc=X('Squat au poids du corps','Cuisses · fessiers','3 séries de 15',15,false,['<b>Départ</b> : pieds largeur d\'épaules, bras devant pour l\'équilibre.','<b>Mouvement</b> : descends cuisses parallèles au sol, remonte en poussant dans les talons.','<b>Plus dur</b> : ralentis la descente (3 s) ou passe aux fentes sautées.']);
+  EXOS.tractions=X('Tractions (barre du parc) ou rowing australien','Dos · biceps','3 séries de 5 à 8',6,false,['<b>Tractions</b> : suspendu à une barre, mains largeur d\'épaules, monte jusqu\'au menton au-dessus de la barre.','<b>Pas encore de traction ?</b> Rowing australien : sous une barre basse ou une table solide, corps droit, tire la poitrine vers la barre.','<b>Erreurs</b> : se balancer, ne pas descendre bras tendus.']);
+  EXOS.dips=X('Dips sur banc ou chaise','Triceps · pectoraux','3 séries de 8 à 12',10,false,['<b>Départ</b> : mains sur le bord d\'un banc stable derrière toi, jambes devant.','<b>Mouvement</b> : plie les coudes vers l\'arrière jusqu\'à 90°, puis pousse.','<b>Erreurs</b> : épaules qui montent vers les oreilles, descendre trop bas.']);
+  EXOS.pont=X('Pont fessier','Fessiers · arrière des cuisses','3 séries de 15',15,false,['<b>Départ</b> : sur le dos, genoux pliés, pieds au sol.','<b>Mouvement</b> : monte le bassin en serrant les fessiers, tiens 1 s, redescends.','<b>Plus dur</b> : sur une seule jambe.']);
+  EXOS.grimpeur=X('Mountain climbers (grimpeur)','Abdominaux · cardio','3 fois 30 secondes',30,false,['<b>Départ</b> : position de pompe, bras tendus.','<b>Mouvement</b> : ramène un genou vers la poitrine puis l\'autre, rapidement, dos plat.','<b>Erreurs</b> : fesses trop hautes.'],'s');
+  var LIEUX={salle:{nom:'Salle de sport',A:['squat','pompes','rowing','gainage'],B:['souleve','militaire','rowing','gainage']},
+    maison:{nom:'Maison (haltères)',A:['goblet','devsol','rowh','gainage'],B:['souleveh','epaulesh','fentes','gainage']},
+    calis:{nom:'Callisthénie (sans matériel, dehors ou maison)',A:['squatpdc','pompes','tractions','gainage'],B:['fentes','dips','pont','grimpeur']}};
+  var lieu='maison';try{lieu=localStorage.getItem('cy.lieu')||'maison'}catch(e){}if(!LIEUX[lieu])lieu='maison';
+  var PROG=LIEUX[lieu];
   var cur=null, prog='A';
   function db(){return window.UnGeste.db()}
   function jourS(){var j=window.UnGeste.jour();if(!j.series)j.series=[];return j}
@@ -519,7 +538,8 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     if(toutes&&e.poids&&best.kg)txt+=' 👍 Tu as dépassé l\'objectif : essaie '+(Math.round(best.kg*1.05*2)/2)+' kg (environ +5 %).';
     else if(toutes)txt+=' 👍 Objectif dépassé : ajoute 2 répétitions'+(e.unite?' (ou 10 s)':'')+'.';
     return txt}
-  function rendreProg(){document.querySelectorAll('[data-prog]').forEach(function(b){b.style.fontWeight=b.dataset.prog===prog?'700':'400';b.setAttribute('aria-pressed',b.dataset.prog===prog)});
+  function rendreProg(){document.querySelectorAll('[data-lieu]').forEach(function(b){var on=b.dataset.lieu===lieu;b.style.fontWeight=on?'700':'400';b.setAttribute('aria-pressed',on)});$('lieuNom').textContent=LIEUX[lieu].nom;
+    document.querySelectorAll('[data-prog]').forEach(function(b){b.style.fontWeight=b.dataset.prog===prog?'700':'400';b.setAttribute('aria-pressed',b.dataset.prog===prog)});
     var j=jourS();$('progListe').innerHTML=PROG[prog].map(function(k){var n=j.series.filter(function(x){return x.exo===k}).length,e=EXOS[k];
       return '<li><span>'+esc(e.nom)+' <span class="est">· '+e.obj+'</span></span><button data-exo="'+k+'">'+(n?n+'/'+e.series+' ✓':'Ouvrir')+'</button></li>'}).join('');
     var nb=Object.keys(db().jours).filter(function(k){return(db().jours[k].series||[]).length}).length;
@@ -535,6 +555,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     var j=jourS();if(!j.debut)j.debut=Date.now();j.series.push({exo:cur,kg:e.poids?kg:0,rep:r,t:Date.now()});window.UnGeste.save();$('seRep').value='';rendreSeries();rendreProg();
     toast_('Série notée');if(navigator.vibrate)navigator.vibrate(15)};
   document.addEventListener('click',function(ev){var d=ev.target.dataset;if(!d)return;
+    if(d.lieu){lieu=d.lieu;PROG=LIEUX[lieu];try{localStorage.setItem('cy.lieu',lieu)}catch(e){}$('exoCard').classList.add('hide');cur=null;rendreProg()}
     if(d.prog){prog=d.prog;try{localStorage.setItem('ungeste.prog',prog)}catch(e){}rendreProg()}
     if(d.exo)ouvrir(d.exo);
     if(d.dels2!==undefined){jourS().series.splice(+d.dels2,1);window.UnGeste.save();rendreSeries();rendreProg()}});
@@ -550,7 +571,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   $('finSeance').onclick=function(){var j=jourS();if(!j.series.length){$('finInfo').textContent='Note au moins une série avant de terminer.';return}
     var min=Math.max(10,Math.round((Date.now()-(j.debut||j.series[0].t))/60000));if(min>180)min=60;
     var noms=[];j.series.forEach(function(x){var n=EXOS[x.exo].nom.split(' (')[0];if(noms.indexOf(n)<0)noms.push(n)});
-    window.UnGeste.ajouterSeance(3.5,min,'Séance '+prog+' : '+noms.join(', '));j.debut=null;window.UnGeste.save();
+    window.UnGeste.ajouterSeance(3.5,min,'Séance '+prog+' ('+LIEUX[lieu].nom.split(' (')[0]+') : '+noms.join(', '));j.debut=null;window.UnGeste.save();
     prog=prog==='A'?'B':'A';try{localStorage.setItem('ungeste.prog',prog)}catch(e){}rendreProg();$('finInfo').textContent='Séance enregistrée ('+min+' min). La prochaine sera la séance '+prog+'.';stop()};
   try{prog=localStorage.getItem('ungeste.prog')||'A'}catch(e){}
   rendreProg();
