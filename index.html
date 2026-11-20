@@ -76,6 +76,22 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       <div class="num est" id="totKcal"></div>
     </div>
 
+    <div class="card num" id="objCard">
+      <div class="lbl">Objectif calories du jour</div>
+      <div class="big" style="font-size:26px"><span id="objReste">—</span></div>
+      <div class="est" id="objDet">Remplis « Mon profil » dans Réglages pour avoir un objectif.</div>
+      <div class="bar" aria-hidden="true" style="margin-top:10px"><i id="objBar" style="width:0"></i></div>
+    </div>
+
+    <div class="card">
+      <div class="lbl">Mon poids</div>
+      <div class="row num" style="margin-top:6px">
+        <input id="pSaisie" aria-label="Poids du jour en kg" type="number" inputmode="decimal" step="0.1" placeholder="kg aujourd'hui">
+        <button id="pAjout" style="flex:0 0 auto">Noter</button>
+      </div>
+      <div id="pCourbe" style="margin-top:10px"></div>
+    </div>
+
     <div class="card">
       <div class="lbl">Séances du jour</div>
       <ul id="listeSeances"></ul>
@@ -127,7 +143,8 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     <div id="rListeBloc">
       <div class="card" style="padding:12px 16px">
         <div class="lbl">Recettes simples et pas chères · calories calculées avec Ciqual</div>
-        <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button><button data-rf="batch">🧊 Batch</button></div>
+        <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button><button data-rf="batch">🧊 Batch</button><button data-rf="rassasiant">🥩 Protéiné et léger</button><button data-rf="sansporc">Sans porc</button><button data-rf="sanslactose">Sans lactose</button><button data-rf="sansgluten">Sans gluten</button></div>
+        <div class="est" style="margin-top:6px;font-size:12px">« Protéiné et léger » : au moins 25 g de protéines pour moins de 600 kcal par portion. Filtres sans porc / lactose / gluten calculés d'après les ingrédients : vérifie toujours les étiquettes si tu as une allergie.</div>
         <div class="est hide" id="rBatchInfo" style="margin-top:8px">Batch cooking : on cuisine une fois en grande quantité (le week-end par exemple), puis on garde les portions au frigo ou au congélateur pour la semaine.</div>
       </div>
       <div id="rListe"></div>
@@ -226,6 +243,36 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       <label for="rCache" style="display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ink);font-size:15px;min-height:44px"><input id="rCache" type="checkbox" style="width:auto"> Cacher tous les chiffres de calories</label>
     </div>
     <div class="card">
+      <div class="lbl">Mon profil (pour l'objectif calories)</div>
+      <label for="pSexe">Sexe</label>
+      <select id="pSexe"><option value="">—</option><option value="h">Homme</option><option value="f">Femme</option></select>
+      <label for="pAge">Âge</label>
+      <input id="pAge" type="number" inputmode="numeric" placeholder="ex. 25">
+      <label for="pTaille">Taille (cm)</label>
+      <input id="pTaille" type="number" inputmode="numeric" placeholder="ex. 178">
+      <label for="pMetier">Mon travail</label>
+      <select id="pMetier">
+        <option value="1.4">Assis (bureau, informatique, conduite)</option>
+        <option value="1.55">Un peu debout (vente, enseignement, accueil)</option>
+        <option value="1.7">Debout et actif (serveur, aide-soignant, magasinier)</option>
+        <option value="1.9">Physique (BTP, livreur à vélo, agriculteur)</option>
+        <option value="2.1">Très physique (déménageur, maçon, bûcheron)</option>
+      </select>
+      <label for="pBut">Mon but</label>
+      <select id="pBut"><option value="-400">Perdre du poids doucement</option><option value="0">Garder mon poids</option><option value="300">Prendre du muscle</option></select>
+      <small class="est" style="display:block;margin-top:8px">Calcul : formule de Mifflin-St Jeor × niveau d'activité du travail. Les séances de sport s'ajoutent en plus. C'est une estimation, pas un avis médical.</small>
+    </div>
+    <div class="card">
+      <div class="lbl">Rappels d'eau</div>
+      <label for="eRappel" style="display:flex;gap:10px;align-items:center;margin-top:8px;color:var(--ink);font-size:15px;min-height:44px"><input id="eRappel" type="checkbox" style="width:auto"> Activer les rappels</label>
+      <div class="row num" style="margin-top:6px">
+        <input id="eHeure" type="time" aria-label="Heure du rappel" value="10:00">
+        <button id="eAjout" style="flex:0 0 auto">Ajouter</button>
+      </div>
+      <div class="chips" id="eListe"></div>
+      <small class="est" id="eNote" style="display:block;margin-top:8px">Autant d'heures que tu veux, à la minute près. Pour l'instant, le rappel sonne quand l'appli est ouverte ou en arrière-plan récent ; le rappel appli fermée viendra avec la version magasin d'applis.</small>
+    </div>
+    <div class="card">
       <div class="lbl">Tes données</div>
       <div class="row" style="margin-top:8px"><button id="exp">Exporter</button><button id="imp">Importer</button></div>
       <input id="impFile" type="file" accept="application/json" class="hide">
@@ -280,7 +327,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     $('listeSeances').innerHTML=j.seances.length?j.seances.map(function(s,i){
       return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'" aria-label="Supprimer cette séance">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=r.cache?'none':''});
-    calcSeance();histo();
+    calcSeance();histo();if(window.CYsuivi)window.CYsuivi();
     $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=r.eau;$('rCache').checked=r.cache;
   }
   function calcSeance(){
@@ -516,11 +563,19 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   function toast_(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1500)}
   var R=window.RECETTES||[], C={}, filtre='', cur=null, nbp=2;
   (window.CIQUAL&&window.CIQUAL.aliments||[]).forEach(function(a){C[a[0]]=a});
+  /* Filtres automatiques d'après les ingrédients (noms Ciqual). À relire : ce n'est pas un avis d'allergologue. */
+  (function(){var PORC=/porc|jambon|lardon|bacon|saucisse|chorizo|chipolata|lard/i,LAIT=/lait|fromage|emmental|yaourt|beurre|crème|creme|mozzarella|parmesan|comté|feta|ricotta|skyr|fromage blanc/i,
+    GLUT=/pâtes|pates|pain|farine|blé|ble|semoule|boulgour|couscous|biscotte|chapelure|tortilla|wrap|avoine|orge|seigle/i,VIANDE=/poulet|dinde|boeuf|bœuf|porc|jambon|veau|agneau|thon|saumon|poisson|cabillaud|lieu|colin|merlu|lardon|crevette|sardine|steak|viande/i;
+    R.forEach(function(r){var n=r.ing.map(function(x){return x[0]+' '+x[1]}).join(' | '),v=valeurs(r),t=r.tags;
+      function a(x){if(t.indexOf(x)<0)t.push(x)}
+      if(!PORC.test(n))a('sansporc');if(!LAIT.test(n.replace(/lait de coco|sans lactose|beurre de cacahu[eè]te/ig,'')))a('sanslactose');if(!GLUT.test(n))a('sansgluten');
+      if(!VIANDE.test(n)&&t.indexOf('vege')<0)a('vege');
+      if(v.ok&&v.p>=25&&v.k<=600)a('rassasiant')})})();
   function cache(){try{return window.UnGeste.db().reglages.cache}catch(e){return false}}
   /* calories et protéines pour UNE portion */
   function valeurs(r){var k=0,p=0,ok=true;r.ing.forEach(function(x){var a=C[x[1]];if(!a||a[1]==null){ok=false;return}k+=a[1]*x[2]/100;p+=(a[2]||0)*x[2]/100});
     return{k:Math.round(k/r.portions),p:Math.round(p/r.portions),ok:ok}}
-  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin',batch:'batch cooking'};ICO.batch='🧊';
+  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin',batch:'batch cooking',rassasiant:'protéiné et léger',sansporc:'sans porc',sanslactose:'sans lactose',sansgluten:'sans gluten'};ICO.batch='🧊';
   function liste(){var h=R.filter(function(r){return !filtre||r.tags.indexOf(filtre)>=0}).map(function(r){var v=valeurs(r);
       return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+(r.portions>2?r.portions+' portions · ':'')+r.tags.map(function(t){return '<span aria-hidden="true">'+(ICO[t]||'')+'</span><span class="sr">'+(TXT[t]||t)+', </span>'}).join(' ')+'</span></span>'+
         (cache()?'':'<span class="est" style="text-align:right;white-space:nowrap">≈ '+v.k+' kcal<span class="sr"> par portion,</span><br>'+v.p+' g prot.</span>')+'</button>'}).join('');
@@ -547,6 +602,38 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   $('rManger').onclick=function(){if(!cur)return;var v=valeurs(cur);
     window.UnGeste.ajouterRepas({nom:cur.nom+' (1 portion)',kcal:v.ok?v.k:null,src:'CIQUAL'});toast_('Ajouté à tes repas du jour');if(navigator.vibrate)navigator.vibrate(15)};
   liste();
+})();
+</script>
+<script>
+/* Suivi : objectif calories (Mifflin-St Jeor × métier), courbe de poids, rappels d'eau. */
+(function(){
+  var U=window.UnGeste;function $(id){return document.getElementById(id)}
+  function D(){var d=U.db();if(!d.profil)d.profil={sexe:'',age:'',taille:'',metier:'1.4',but:'0'};if(!d.poidsLog)d.poidsLog=[];if(!d.rappels)d.rappels={on:false,heures:['10:00','14:00','17:00']};return d}
+  function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1600)}
+  function objectif(){var d=D(),p=d.profil,kg=d.reglages.poids,a=+p.age,t=+p.taille;if(!p.sexe||!a||!t)return null;
+    var bmr=10*kg+6.25*t-5*a+(p.sexe==='h'?5:-161);return Math.round((bmr*(+p.metier)+(+p.but))/10)*10}
+  function courbe(){var L=D().poidsLog.slice(-30);if(L.length<2)return L.length?'<span class="est">1 mesure : '+L[0].kg+' kg. Note-le plusieurs jours pour voir la courbe.</span>':'<span class="est">Aucune mesure.</span>';
+    var ks=L.map(function(x){return x.kg}),mi=Math.min.apply(0,ks),ma=Math.max.apply(0,ks),r=(ma-mi)||1,W=300,H=80;
+    var pts=L.map(function(x,i){return (i*W/(L.length-1)).toFixed(1)+','+(H-6-(x.kg-mi)/r*(H-12)).toFixed(1)}).join(' ');
+    return '<svg viewBox="0 0 300 80" width="100%" height="80" role="img" aria-label="Courbe de poids, de '+L[0].kg+' à '+L[L.length-1].kg+' kg"><polyline points="'+pts+'" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg><div class="est">'+L[0].d.slice(5).split('-').reverse().join('/')+' : '+L[0].kg+' kg → aujourd\'hui : '+L[L.length-1].kg+' kg</div>'}
+  window.CYsuivi=function(){var d=D(),o=objectif(),j=U.jour(),tot=0;j.repas.forEach(function(x){if(x.kcal)tot+=x.kcal});
+    var sp=0;j.seances.forEach(function(s){sp+=s.kcal||0});
+    if(o){var cible=o+sp,reste=cible-tot;$('objReste').textContent=(reste>=0?reste+' kcal restantes':(-reste)+' kcal au-dessus');
+      $('objDet').textContent='Objectif '+o+' kcal'+(sp?' + '+sp+' (sport)':'')+' · noté '+tot+' kcal';$('objBar').style.width=Math.min(100,tot/cible*100)+'%'}
+    $('pCourbe').innerHTML=d.reglages.cache?'<span class="est">Chiffres cachés.</span>':courbe();
+    var p=d.profil;$('pSexe').value=p.sexe;$('pAge').value=p.age;$('pTaille').value=p.taille;$('pMetier').value=p.metier;$('pBut').value=p.but;
+    $('eRappel').checked=d.rappels.on;$('eListe').innerHTML=d.rappels.heures.slice().sort().map(function(h){return '<button data-eh="'+h+'" aria-label="Retirer le rappel de '+h+'">'+h+' ✕</button>'}).join('')};
+  ['pSexe','pAge','pTaille','pMetier','pBut'].forEach(function(id){$(id).onchange=function(){var k={pSexe:'sexe',pAge:'age',pTaille:'taille',pMetier:'metier',pBut:'but'}[id];D().profil[k]=this.value;U.save()}});
+  $('pAjout').onclick=function(){var v=parseFloat(String($('pSaisie').value).replace(',','.'));if(!(v>25&&v<350)){toast('Poids non valide');return}
+    var d=D(),k=U.cle();d.poidsLog=d.poidsLog.filter(function(x){return x.d!==k});d.poidsLog.push({d:k,kg:v});d.poidsLog.sort(function(a,b){return a.d<b.d?-1:1});d.reglages.poids=v;$('pSaisie').value='';U.save();toast('Poids noté')};
+  $('eRappel').onchange=function(){var on=this.checked;D().rappels.on=on;U.save();if(on&&'Notification' in window&&Notification.permission==='default')Notification.requestPermission()};
+  $('eAjout').onclick=function(){var h=$('eHeure').value,r=D().rappels;if(h&&r.heures.indexOf(h)<0){r.heures.push(h);U.save();toast('Rappel à '+h)}};
+  $('eListe').onclick=function(e){var b=e.target.closest('[data-eh]');if(!b)return;var r=D().rappels;r.heures=r.heures.filter(function(h){return h!==b.dataset.eh});U.save()};
+  var vu={};setInterval(function(){var r=D().rappels;if(!r.on)return;var n=new Date(),h=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'),k=U.cle()+h;
+    if(r.heures.indexOf(h)<0||vu[k])return;vu[k]=1;var t='💧 C\'est l\'heure de boire un verre d\'eau';
+    try{if('Notification' in window&&Notification.permission==='granted'){navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:t,icon:'icon-192.png'})}).catch(function(){new Notification('CookYourself',{body:t})}):new Notification('CookYourself',{body:t})}}catch(e){}
+    toast(t);if(navigator.vibrate)navigator.vibrate([80,60,80])},20000);
+  window.CYsuivi();
 })();
 </script>
 <script>
