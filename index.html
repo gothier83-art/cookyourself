@@ -179,6 +179,30 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
 
   <!-- SÉANCE -->
   <section id="v-seance" class="hide">
+    <div class="card" id="gamCard">
+      <div class="row" style="align-items:center">
+        <div><div class="lbl">Série en cours</div><div class="big" style="color:var(--flamme)" id="gSerieBloc"></div></div>
+        <div style="text-align:right"><div class="lbl" id="gNiveau">Niveau 1 · Apprenti</div><div class="est" id="gXp"></div></div>
+      </div>
+      <div class="est" id="gEtat" style="margin-top:4px"></div>
+      <div class="est" id="gJoker" style="margin-top:2px"></div>
+      <div class="bar" aria-hidden="true" style="margin:8px 0 12px"><i id="gXpBar" style="width:0"></i></div>
+      <div class="lbl">Objectif de la semaine</div>
+      <div class="chips" role="group" aria-label="Nombre de séances visées par semaine" style="margin-top:6px"><button data-obj="2">2 séances</button><button data-obj="3">3 séances</button><button data-obj="4">4 séances</button></div>
+      <div id="gSemaine" style="display:flex;gap:6px;margin:8px 0"></div>
+      <div class="est" id="gSemaineTxt"></div>
+      <div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--soft)">
+        <div class="lbl">Défi du jour <span class="est">(pour les jours sans séance)</span></div>
+        <div style="font-weight:600;margin:4px 0" id="gDefi"></div>
+        <div class="est" id="gDefiFacile"></div>
+        <div id="gDefiZone" style="margin-top:8px"></div>
+        <div class="est" style="margin-top:6px">Écoute ton corps : le repos compte aussi.</div>
+      </div>
+      <div class="lbl" style="margin-top:12px">Badges <span class="est" id="gBadgesNb"></span></div>
+      <div class="chips" id="gBadges"></div>
+      <div class="est" id="gProchain" style="margin-top:6px"></div>
+      <details style="margin-top:6px"><summary class="est" style="min-height:44px;display:flex;align-items:center;cursor:pointer">Voir tous les badges</summary><div class="chips" id="gBadgesTous"></div></details>
+    </div>
     <div class="card">
       <div class="lbl">Où t'entraînes-tu ?</div>
       <div class="chips" role="group" aria-label="Lieu d'entraînement" style="margin-top:8px"><button data-lieu="maison">🏠 Maison (haltères)</button><button data-lieu="calis">🌳 Callisthénie</button><button data-lieu="salle">🏋️ Salle</button></div>
@@ -350,7 +374,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     $('listeSeances').innerHTML=j.seances.length?j.seances.map(function(s,i){
       return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'" aria-label="Supprimer cette séance">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=r.cache?'none':''});
-    calcSeance();histo();if(window.CYsuivi)window.CYsuivi();
+    calcSeance();histo();if(window.CYsuivi)window.CYsuivi();if(window.CYgam)window.CYgam();
     $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=L(objMl()).replace(',','.');$('rCache').checked=r.cache;
   }
   function calcSeance(){
@@ -678,6 +702,70 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     try{if('Notification' in window&&Notification.permission==='granted'){navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:t,icon:'icon-192.png'})}).catch(function(){new Notification('CookYourself',{body:t})}):new Notification('CookYourself',{body:t})}}catch(e){}
     toast(t);if(navigator.vibrate)navigator.vibrate([80,60,80])},20000);
   window.CYsuivi();
+})();
+</script>
+<script>
+/* Gamification du sport (v2, après revue PM / design / QA).
+   Jour actif = séance terminée, séries notées, ou défi du jour. Joker : 1 par semaine (lundi-dimanche).
+   Points recalculés depuis les données : séance terminée 50, séries 10 chacune plafonnées à 100 par jour, défi 20 seulement les jours sans séance. */
+(function(){
+  var U=window.UnGeste;function $(i){return document.getElementById(i)}
+  var DEFIS=[['20 squats au poids du corps','Version facile : 10 squats en t\'aidant d\'une chaise'],['1 minute de gainage (en 2 fois si besoin)','Version facile : 3 × 15 secondes, genoux au sol'],['10 minutes de marche rapide','Version facile : 10 minutes de marche tranquille'],['15 pompes','Version facile : 8 pompes sur les genoux ou contre un mur'],['5 minutes d\'étirements','Version facile : 3 minutes, sans forcer'],['2 × 30 secondes de grimpeur','Version facile : 2 × 15 secondes, lentement'],['5 minutes d\'escaliers','Version facile : 2 minutes, à ton rythme'],['20 fentes (10 par jambe)','Version facile : 10 fentes en te tenant à un mur'],['30 ponts fessiers','Version facile : 15 ponts fessiers'],['10 minutes de vélo ou de corde à sauter','Version facile : 10 minutes de marche']];
+  var NIV=['Apprenti','Motivé','Régulier','Athlète','Machine','Légende'];
+  var BADGES=[['s1','🎉','Première séance',function(s){return[s.s,1]}],['sem','📅','Objectif de la semaine atteint',function(s){return[s.semS,s.obj]}],['d5','⚡','5 défis du jour',function(s){return[s.d,5]}],['r7','🔥','7 jours de suite',function(s){return[s.sr,7]}],['s10','💪','10 séances',function(s){return[s.s,10]}],['maison','🏠','Première séance maison',function(s){return[s.lieux.Maison?1:0,1]}],['calis','🌳','Première séance callisthénie',function(s){return[s.lieux['Callisthénie']?1:0,1]}],['p100','🧱','100 séries notées',function(s){return[s.p,100]}],['s30','🏅','30 séances',function(s){return[s.s,30]}],['r30','🌟','30 jours de suite',function(s){return[s.sr,30]}]];
+  var JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  function G(){var d=U.db();if(!d.gam||typeof d.gam!=='object')d.gam={};var g=d.gam;if(!g.defis||typeof g.defis!=='object')g.defis={};if(!g.vus||typeof g.vus!=='object')g.vus={};if([2,3,4].indexOf(+g.objSemaine)<0)g.objSemaine=3;g.objSemaine=+g.objSemaine;return g}
+  function cle(dt){return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+  function aujD(){var t=new Date();return new Date(t.getFullYear(),t.getMonth(),t.getDate())}
+  function fini(j){return !!(j&&(j.seances||[]).length)}
+  function effort(j){return !!(j&&((j.seances||[]).length||(j.series||[]).length))}
+  function actif(k){return effort(U.db().jours[k])||!!G().defis[k]}
+  function lundi(dt){var x=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+  /* Série : depuis aujourd'hui (ou hier si aujourd'hui n'est pas encore fait). Le joker couvre 1 jour manqué par semaine, y compris le premier jour regardé. */
+  function serie(){var dt=aujD(),n=0,jk={},max=3000,sauves={},enCours=false;
+    if(!actif(cle(dt))){dt.setDate(dt.getDate()-1);enCours=true}
+    while(max--){var k=cle(dt);if(actif(k))n++;else{var w=cle(lundi(dt));if(jk[w])break;jk[w]=1;sauves[k]=1}dt.setDate(dt.getDate()-1)}
+    /* un joker posé avant le premier jour actif ne compte pas */
+    var ks=Object.keys(sauves).sort(),premier=null;if(n){var x=aujD();if(enCours)x.setDate(x.getDate()-1);for(var i=0;i<3000;i++){var kk=cle(x);if(actif(kk))premier=kk;else if(!sauves[kk])break;x.setDate(x.getDate()-1)}}
+    ks.forEach(function(k){if(!premier||k<premier)delete sauves[k]});
+    var wAuj=cle(lundi(aujD())),jokerUtilise=Object.keys(sauves).some(function(k){return cle(lundi(new Date(+k.slice(0,4),+k.slice(5,7)-1,+k.slice(8))))===wAuj});
+    return{n:n,enCours:enCours,sauves:sauves,jokerUtilise:jokerUtilise}}
+  function stats(){var J=U.db().jours,g=G(),s=0,p=0,d=0,pts=0,lieux={};
+    Object.keys(J).forEach(function(k){var j=J[k],ns=(j.seances||[]).length,np=(j.series||[]).length;s+=ns;p+=np;pts+=ns*50+Math.min(100,np*10);
+      (j.seances||[]).forEach(function(x){var m=/\((Maison|Callisthénie|Salle)/.exec(x.exo||'');if(m)lieux[m[1]]=1})});
+    Object.keys(g.defis).forEach(function(k){if(g.defis[k]&&!effort(J[k])){d++;pts+=20}});
+    return{s:s,p:p,d:d,lieux:lieux,pts:pts}}
+  function niveau(pts){var n=Math.floor(Math.sqrt(pts/100)),bas=n*n*100,haut=(n+1)*(n+1)*100,nom=n<NIV.length?NIV[n]:'Légende '+(n-NIV.length+2);return{n:n+1,nom:nom,bas:bas,haut:haut}}
+  function semaine(){var l=lundi(aujD()),r=[],auj=cle(aujD()),sr=serie();for(var i=0;i<7;i++){var x=new Date(l);x.setDate(l.getDate()+i);var k=cle(x),j=U.db().jours[k];
+    r.push({k:k,s:fini(j),e:effort(j),d:!!G().defis[k],joker:!!sr.sauves[k],auj:k===auj,futur:k>auj,nom:JOURS[i]})}return r}
+  var dejaFete={};
+  function feter(t,cle){if(cle){if(dejaFete[cle])return;dejaFete[cle]=1}var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(feter.t);feter.t=setTimeout(function(){e.classList.remove('on')},3500);if(navigator.vibrate)navigator.vibrate([60,40,60,40,120])}
+  window.CYgam=function(){if(!$('gamCard'))return;var g=G(),sr=serie(),st=stats(),sem=semaine(),auj=cle(aujD()),jAuj=U.db().jours[auj],fait=actif(auj);
+    var semS=sem.filter(function(x){return x.s}).length;st.sr=sr.n;st.semS=semS;st.obj=g.objSemaine;
+    $('gSerieBloc').innerHTML=sr.n?'<span aria-hidden="true">🔥</span> '+sr.n+' <span style="font-size:18px">'+(sr.n>1?'jours':'jour')+'</span>':'<span style="font-size:22px">Lance ta série aujourd\'hui 💪</span>';
+    $('gEtat').innerHTML=fait?'Journée validée ✓ Reviens demain pour passer à '+(sr.n+1)+'.':(sr.n?'<b>Ta série de '+sr.n+' jour'+(sr.n>1?'s':'')+' s\'arrête ce soir</b> : fais ta séance ou le défi (2 minutes).':'Fais ta séance ou le défi du jour pour commencer.');
+    $('gJoker').textContent=sr.jokerUtilise?'🛡️ Joker utilisé cette semaine (il revient lundi)':'🛡️ Joker disponible : il protège ta série si tu oublies un jour cette semaine';
+    var nv=niveau(st.pts);$('gNiveau').textContent='Niveau '+nv.n+' · '+nv.nom;$('gXp').textContent=st.pts+' points · prochain niveau à '+nv.haut;$('gXpBar').style.width=Math.min(100,(st.pts-nv.bas)/(nv.haut-nv.bas)*100)+'%';
+    document.querySelectorAll('[data-obj]').forEach(function(b){var on=+b.dataset.obj===g.objSemaine;b.style.fontWeight=on?'700':'400';b.setAttribute('aria-pressed',on)});
+    $('gSemaine').innerHTML=sem.map(function(x){var etat=x.s?'séance faite':x.e?'séries notées':x.d?'défi fait':x.joker?'sauvé par le joker':x.futur?'à venir':x.auj?'pas encore fait':'rien',
+      bg=x.s?'var(--acc)':x.e||x.d?'#f59e0b':'transparent',fg=x.s?'var(--card)':x.e||x.d?'#1c2321':'inherit',ic=x.joker?'🛡️':x.nom[0].toUpperCase();
+      return '<span style="flex:1;text-align:center;padding:8px 0;border-radius:10px;font-weight:700;border:2px solid '+(x.auj?'currentColor':'rgba(127,127,127,.45)')+';background:'+bg+';color:'+fg+'"><span aria-hidden="true">'+ic+'</span><span class="sr">'+x.nom+' : '+etat+'</span></span>'}).join('');
+    $('gSemaineTxt').textContent=semS>=g.objSemaine?'Objectif atteint : '+semS+' séances cette semaine. Bravo !':semS+' / '+g.objSemaine+' séances terminées cette semaine · encore '+(g.objSemaine-semS)+'.';
+    var doy=Math.floor((aujD()-new Date(aujD().getFullYear(),0,0))/864e5),df=DEFIS[doy%DEFIS.length];$('gDefi').textContent=df[0];$('gDefiFacile').textContent=df[1];
+    $('gDefiZone').innerHTML=effort(jAuj)?'<div style="font-weight:600">Séance faite : ta journée compte déjà 🔥</div>':g.defis[auj]?'<div style="font-weight:600">Défi réussi ✓ +20 points</div><button id="gDefiAnnul" style="min-height:44px;background:none;border:0;text-decoration:underline;padding:0;color:inherit">Annuler</button>':'<button class="main" id="gDefiBtn">J\'ai fait le défi ✓</button>';
+    if($('gDefiBtn'))$('gDefiBtn').onclick=function(){G().defis[auj]=1;U.save();feter('Défi réussi : +20 points 🔥','defi'+auj)};
+    if($('gDefiAnnul'))$('gDefiAnnul').onclick=function(){delete G().defis[auj];U.save()};
+    var nouveaux=[],gagnes=[],prochain=null;BADGES.forEach(function(b){var v=b[3](st),ok=v[0]>=v[1];if(ok&&!g.vus[b[0]]){g.vus[b[0]]=auj;nouveaux.push(b)}if(g.vus[b[0]])gagnes.push(b);else if(!prochain)prochain={b:b,v:v}});
+    function pastille(b,a){return '<span style="padding:6px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.45);'+(a?'':'opacity:.7')+'">'+b[1]+' '+b[2]+(a?'':' <span class="sr">(pas encore gagné)</span>')+'</span>'}
+    $('gBadgesNb').textContent='('+gagnes.length+' / '+BADGES.length+')';
+    $('gBadges').innerHTML=gagnes.length?gagnes.map(function(b){return pastille(b,1)}).join(''):'<span class="est">Ton premier badge t\'attend après ta première séance.</span>';
+    $('gProchain').textContent=prochain?'Prochain : '+prochain.b[1]+' '+prochain.b[2]+' ('+Math.min(prochain.v[0],prochain.v[1])+'/'+prochain.v[1]+')':'Tous les badges sont gagnés. Champion !';
+    $('gBadgesTous').innerHTML=BADGES.map(function(b){return pastille(b,!!g.vus[b[0]])}).join('');
+    if(nouveaux.length){try{localStorage.setItem('ungeste.v1',JSON.stringify(U.db()))}catch(e){}feter('Nouveau badge : '+nouveaux.map(function(b){return b[1]+' '+b[2]}).join(', ')+' !')}};
+  document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-obj]');if(b){G().objSemaine=+b.dataset.obj;U.save()}});
+  /* minuit / retour sur l'appli : on recalcule */
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)window.CYgam()});setInterval(function(){if(!document.hidden)window.CYgam()},60000);
+  window.CYgam();
 })();
 </script>
 <script>
