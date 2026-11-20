@@ -54,11 +54,20 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   <section id="v-jour">
     <div class="card">
       <div class="row" style="align-items:flex-end">
-        <div><div class="lbl">Eau aujourd'hui</div><div class="big"><span id="eau">0</span><span style="font-size:20px"> verres</span></div></div>
-        <div style="text-align:right"><div class="lbl">objectif <span id="eauObj">8</span></div></div>
+        <div><div class="lbl">Eau aujourd'hui</div><div class="big"><span id="eau">0</span><span style="font-size:20px"> L</span></div></div>
+        <div style="text-align:right"><div class="lbl">objectif <span id="eauObj">2</span> L</div></div>
       </div>
       <div class="bar" aria-hidden="true" style="margin:10px 0 12px"><i id="eauBar" style="width:0"></i></div>
-      <button class="main" id="plusEau">+1 verre</button>
+      <div class="row" role="group" aria-label="Ajouter de l'eau" style="flex-wrap:wrap;gap:8px">
+        <button class="main" data-ml="250" style="flex:1 1 40%">🥛 Verre 25 cl</button>
+        <button class="main" data-ml="330" style="flex:1 1 40%">🥫 33 cl</button>
+        <button class="main" data-ml="500" style="flex:1 1 40%">🍺 Pinte 50 cl</button>
+        <button class="main" data-ml="1000" style="flex:1 1 40%">🍶 Bouteille 1 L</button>
+      </div>
+      <div class="row num" style="margin-top:8px">
+        <input id="eauLibre" aria-label="Autre quantité en centilitres" type="number" inputmode="numeric" placeholder="Autre (cl)">
+        <button id="plusEau" style="flex:0 0 auto">Ajouter</button>
+      </div>
       <div class="row" style="margin-top:8px"><button id="moinsEau">Annuler le dernier</button></div>
     </div>
 
@@ -240,8 +249,8 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       <input id="rPoids" type="number" inputmode="decimal" value="75">
       <label for="rAge">Tranche d'âge</label>
       <select id="rAge"><option value="3.5">18 à 59 ans</option><option value="2.7">60 ans et plus</option></select>
-      <label for="rEau">Objectif d'eau (verres)</label>
-      <input id="rEau" type="number" inputmode="numeric" value="8">
+      <label for="rEau">Objectif d'eau (litres par jour)</label>
+      <input id="rEau" type="number" inputmode="decimal" step="0.1" value="2">
       <label for="rCache" style="display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ink);font-size:15px;min-height:44px"><input id="rCache" type="checkbox" style="width:auto"> Cacher tous les chiffres de calories</label>
     </div>
     <div class="card">
@@ -316,12 +325,16 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},1400)}
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function kcalSeance(met,min){var r=db.reglages;var v=met*r.base*r.poids/200*min;return Math.round(v)}
+  /* Eau en millilitres (les anciens jours en « verres » comptent 25 cl chacun). */
+  function ml(j){return j.ml!=null?j.ml:(j.eau||0)*250}
+  function objMl(){var r=db.reglages;return r.eauMl||(r.eau||8)*250}
+  function L(v){return (Math.round(v/50)/20).toString().replace('.',',')}
   function fmtK(v){return db.reglages.cache?'':'≈ '+v+' kcal ('+Math.round(v*0.8)+'-'+Math.round(v*1.2)+')'}
 
   function rendre(){
     var j=jour(),r=db.reglages;
-    $('eau').textContent=j.eau;$('eauObj').textContent=r.eau;
-    $('eauBar').style.width=Math.min(100,j.eau/r.eau*100)+'%';
+    $('eau').textContent=L(ml(j));$('eauObj').textContent=L(objMl());
+    $('eauBar').style.width=Math.min(100,ml(j)/objMl()*100)+'%';
     var tot=0;
     $('listeRepas').innerHTML=j.repas.map(function(x,i){if(x.kcal)tot+=x.kcal;
       return '<li><span>'+esc(x.nom)+(x.kcal&&!r.cache?' · <span class="est">'+x.kcal+' kcal</span>':'')+'</span><button data-delr="'+i+'" aria-label="Supprimer '+esc(x.nom)+'">✕</button></li>'}).join('');
@@ -331,7 +344,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'" aria-label="Supprimer cette séance">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=r.cache?'none':''});
     calcSeance();histo();if(window.CYsuivi)window.CYsuivi();
-    $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=r.eau;$('rCache').checked=r.cache;
+    $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=L(objMl()).replace(',','.');$('rCache').checked=r.cache;
   }
   function calcSeance(){
     var met=parseFloat($('sType').value),min=parseFloat($('sDuree').value)||0;
@@ -342,11 +355,13 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   function histo(){
     var out=[];for(var i=0;i<7;i++){var d=new Date();d.setDate(d.getDate()-i);var k=cle(d),j=db.jours[k];
       var lab=i===0?"Aujourd'hui":d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
-      out.push('<li><span>'+lab+'</span><span class="est">'+(j?j.eau:0)+' verres · '+(j?j.repas.length:0)+' repas · '+(j?j.seances.length:0)+' séance(s)</span></li>')}
+      out.push('<li><span>'+lab+'</span><span class="est">'+(j?L(ml(j)):0)+' L d\'eau · '+(j?j.repas.length:0)+' repas · '+(j?j.seances.length:0)+' séance(s)</span></li>')}
     $('histo').innerHTML=out.join('');
   }
-  $('plusEau').onclick=function(){jour().eau++;save();rendre();if(navigator.vibrate)navigator.vibrate(15);toast('+1 verre')};
-  $('moinsEau').onclick=function(){var j=jour();if(j.eau>0){j.eau--;save();rendre();toast('Annulé')}};
+  function boire(q){var j=jour();j.ml=ml(j)+q;(j.prises=j.prises||[]).push(q);j.eau=Math.round(j.ml/250);save();rendre();if(navigator.vibrate)navigator.vibrate(15);toast('+'+(q/10)+' cl')}
+  document.querySelectorAll('[data-ml]').forEach(function(b){b.onclick=function(){boire(+b.dataset.ml)}});
+  $('plusEau').onclick=function(){var cl=parseFloat(String($('eauLibre').value).replace(',','.'));if(cl>0&&cl<=300){boire(Math.round(cl*10));$('eauLibre').value=''}else toast('Quantité en cl (ex. 75)')};
+  $('moinsEau').onclick=function(){var j=jour(),p=j.prises&&j.prises.length?j.prises.pop():(ml(j)>=250?250:ml(j));if(ml(j)>0){j.ml=Math.max(0,ml(j)-p);j.eau=Math.round(j.ml/250);save();rendre();toast('Annulé')}};
   $('ajRepas').onclick=function(){var n=$('repasNom').value.trim();if(!n)return;var k=parseInt($('repasKcal').value,10)||null;
     jour().repas.push({nom:n,kcal:k,t:Date.now()});
     var f=db.favoris.findIndex(function(x){return x.nom.toLowerCase()===n.toLowerCase()});
@@ -368,7 +383,7 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   $('rmKg').oninput=rm;$('rmRep').oninput=rm;
   $('rPoids').onchange=function(){var v=parseFloat(this.value);if(v>25&&v<350){db.reglages.poids=v;save();rendre()}};
   $('rAge').onchange=function(){db.reglages.base=parseFloat(this.value);save();rendre()};
-  $('rEau').onchange=function(){var v=parseInt(this.value,10);if(v>0&&v<40){db.reglages.eau=v;save();rendre()}};
+  $('rEau').onchange=function(){var v=parseFloat(String(this.value).replace(',','.'));if(v>=0.5&&v<=6){db.reglages.eauMl=Math.round(v*1000);save();rendre()}};
   $('rCache').onchange=function(){db.reglages.cache=this.checked;save();rendre()};
   $('exp').onclick=function(){var txt=JSON.stringify(db,null,1);
     try{var b=new Blob([txt],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='cookyourself-'+cle()+'.json';a.click()}catch(e){}
