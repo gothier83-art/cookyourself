@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CookYourself — cuisine, bouge, progresse</title>
+<meta name="description" content="CookYourself : des recettes protéinées faciles, des séances de sport à la maison, au parc ou en salle, et le suivi de l'eau. Gratuit, sans pub.">
+<meta name="theme-color" content="#fbf6ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17110d" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="CookYourself">
+<meta property="og:description" content="Recettes protéinées, sport et eau. Gratuit, sans pub.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cookyourself.fitness/">
+<link rel="icon" href="/app/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/app/apple-touch-icon.png">
+<link rel="preload" href="/app/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+/* Appli installée sur l'écran d'accueil : on ouvre directement l'appli. */
+try { if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) location.replace('/app/' + location.search); } catch (e) {}
+/* Lien de parrainage (?p=CODE) : on le transmet aux liens vers l'appli. */
+document.addEventListener('DOMContentLoaded', function(){ var p = new URLSearchParams(location.search).get('p'); if (!p || !/^[A-Z0-9]{6}$/.test(p)) return;
+  document.querySelectorAll('a[href^="/app/"]').forEach(function(a){ var u = new URL(a.getAttribute('href'), location.origin); u.searchParams.set('p', p); a.setAttribute('href', u.pathname + u.search); }); });
+</script>
+<style>
+/* Polices hébergées sur le site (pas de Google Fonts). */
+@font-face{font-family:Fredoka;src:url(/app/fonts/fredoka.woff2) format("woff2");font-weight:300 700;font-display:swap}
+@font-face{font-family:Inter;src:url(/app/fonts/inter.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#fbf6ee;--card:#fff;--ink:#2a1f17;--mute:#6b5a4c;--acc:#c2410c;--acc2:#fde8d7;--acc-ink:#9a3412;--on-acc:#fff;--line:#eadfce;--fresh:#15803d;--fresh2:#dcfce7;--water:#0369a1;--water2:#e0f2fe;--titre:Fredoka,Inter,system-ui,sans-serif;--texte:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#17110d;--card:#221a14;--ink:#f6ede4;--mute:#b9a796;--acc:#fb923c;--acc2:#3a2416;--acc-ink:#fdba74;--on-acc:#1a0f08;--line:#33271e;--fresh:#4ade80;--fresh2:#14301f;--water:#38bdf8;--water2:#0c2a3a}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--texte)}
+a{color:var(--acc-ink)}
+h1,h2,h3{font-family:var(--titre);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;border-radius:999px;font:600 17px var(--texte);text-decoration:none;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn-main{background:var(--acc);color:var(--on-acc)}
+.btn-sec{background:var(--acc2);color:var(--acc-ink)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+/* en-tête */
+header{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:var(--titre);font-weight:600;font-size:22px}
+.logo b{color:var(--acc);font-weight:600}
+header .btn{min-height:44px;padding:0 18px;font-size:15px}
+/* héros */
+.hero{padding:56px 0 40px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero h1{font-size:clamp(38px,6vw,62px)}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:19px;color:var(--mute);max-width:34ch;margin:18px 0 26px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.note{font-size:15px;color:var(--mute);margin-top:14px}
+.objs-land{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+@media (prefers-color-scheme:dark){.objs-land a{filter:brightness(.85)}}
+.objs-land a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;font-weight:600;font-size:15px;text-decoration:none}
+.btn-main{box-shadow:0 8px 24px rgba(194,65,12,.28)}
+/* téléphone dessiné */
+@media (prefers-color-scheme:dark){.tel{border-color:#000!important;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)!important}}
+.tel{justify-self:center;width:290px;max-width:100%;aspect-ratio:9/18.5;background:var(--card);border:10px solid var(--ink);border-radius:44px;padding:18px 14px;display:flex;flex-direction:column;gap:10px;box-shadow:0 30px 60px -20px rgba(60,30,10,.35)}
+.tel .t1{font-family:var(--titre);font-size:22px;font-weight:600}
+.tel .serie{display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:16px;padding:10px 12px;font-weight:600;color:var(--acc)}
+.tel .anx{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;font-size:12px;color:var(--mute)}
+.tel .anx b{display:block;color:var(--ink);font-family:var(--titre);font-size:15px}
+.tel .faire{background:var(--acc);color:var(--on-acc);border-radius:18px;padding:14px;margin-top:auto}
+.tel .faire small{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;opacity:.95}
+.tel .faire strong{display:block;font-family:var(--titre);font-size:19px;margin:4px 0 10px}
+.tel .faire span{display:block;background:var(--card);color:var(--acc);border-radius:999px;text-align:center;padding:9px;font-weight:600;font-size:14px}
+/* sections */
+section{padding:56px 0}
+.titre-sec{font-size:clamp(28px,4vw,40px);margin-bottom:10px}
+.intro{color:var(--mute);max-width:56ch;margin:0 0 30px}
+.grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.carte{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 2px 10px rgba(60,30,10,.06)}
+@media (prefers-color-scheme:dark){.carte{box-shadow:none;border:1px solid var(--line)}}
+.carte .ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.carte h3{font-size:20px;margin-bottom:6px}
+.carte p{margin:0;color:var(--mute);font-size:16px}
+.etapes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;counter-reset:e}
+.etape{background:var(--card);border-radius:22px;padding:22px;position:relative}
+.etape h3{font-size:19px;margin:0 0 6px}
+.etape p{margin:0;color:var(--mute);font-size:16px}
+.etape::before{counter-increment:e;content:counter(e);display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:999px;background:var(--acc2);color:var(--acc-ink);font:600 17px var(--titre);margin-bottom:12px}
+.bandeau{background:var(--acc);color:var(--on-acc);border-radius:28px;padding:36px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.bandeau h2{font-size:clamp(26px,3.5vw,36px)}
+.bandeau p{margin:10px 0 0;max-width:52ch}
+.bandeau .btn{background:var(--card);color:var(--acc)}
+.liste{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.liste li{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:18px;padding:16px 18px}
+.liste svg{flex:0 0 auto;margin-top:2px;color:var(--fresh)}
+details{background:var(--card);border-radius:18px;padding:4px 18px;margin-bottom:10px}
+summary{min-height:52px;display:flex;align-items:center;font-weight:600;cursor:pointer}
+details p{margin:0 0 16px;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:30px 0 calc(30px + env(safe-area-inset-bottom));color:var(--mute);font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--mute)}
+@media (max-width:860px){.hero .wrap{grid-template-columns:1fr}.grille{grid-template-columns:repeat(2,minmax(0,1fr))}.etapes{grid-template-columns:1fr}.bandeau{grid-template-columns:1fr;padding:28px}}
+@media (max-width:520px){.grille{grid-template-columns:1fr}.hero{padding-top:36px}header .wrap .btn-sec{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="CookYourself, accueil">
+      <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 24h36c0 10-8 17-18 17S6 34 6 24z" fill="currentColor" style="color:var(--acc)"/><path d="M17 8c-3 4 3 6 0 10M24 6c-3 4 3 6 0 10M31 8c-3 4 3 6 0 10" fill="none" stroke="var(--acc)" stroke-width="2.8" stroke-linecap="round"/></svg>
+      <span>Cook<b>Yourself</b></span>
+    </a>
+    <div style="display:flex;gap:8px">
+      <a class="btn btn-sec" href="/app/">Ouvrir l'appli</a>
+      <a class="btn btn-main" href="/app/">Commencer</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Cuisine. Bouge.<br><span>Progresse.</span></h1>
+        <p>Muscle, perte de poids, performances ou sèche : des recettes et des séances faites pour ton objectif. Prêt en 10 secondes.</p>
+        <div class="cta">
+          <a class="btn btn-main" href="/app/">Commencer gratuitement</a>
+          <a class="btn btn-sec" href="#fonctions">Voir ce qu'elle fait</a>
+        </div>
+        <p class="note" style="margin:18px 0 0">Ou choisis directement ton objectif :</p>
+        <nav class="objs-land" aria-label="Choisis directement ton objectif">
+          <a href="/app/?but=perf" style="background:#fde8d7;color:#9a3412"><span aria-hidden="true">⚡&nbsp;</span>Performances</a>
+          <a href="/app/?but=muscle" style="background:#fef3c7;color:#92400e"><span aria-hidden="true">💪&nbsp;</span>Muscle</a>
+          <a href="/app/?but=perdre" style="background:#dcfce7;color:#166534"><span aria-hidden="true">🌿&nbsp;</span>Perdre du poids</a>
+          <a href="/app/?but=secher" style="background:#e0f2fe;color:#075985"><span aria-hidden="true">🔥&nbsp;</span>Sèche</a>
+        </nav>
+        <div class="note">✓ Gratuit · ✓ Sans pub · ✓ Tes données restent à toi</div>
+      </div>
+      <div class="tel" role="img" aria-label="Aperçu de l'appli : série de 5 jours, eau, repas, et la séance du jour à commencer">
+        <div class="t1">Salut !</div>
+        <div class="serie"><span aria-hidden="true">🔥</span> 5 jours de suite</div>
+        <div class="anx">
+          <div><svg width="58" height="58" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--water2)" stroke-width="9"/><circle cx="38" cy="38" r="31" fill="none" stroke="var(--water)" stroke-width="9" stroke-linecap="round" stroke-dasharray="117 195" transform="rotate(-90 38 38)"/></svg><b>1,2 L</b>Eau</div>
+          <div><svg width="58" height="58" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--acc2)" stroke-width="9"/><circle cx="38" cy="38" r="31" fill="none" stroke="var(--acc)" stroke-width="9" stroke-linecap="round" stroke-dasharray="130 195" transform="rotate(-90 38 38)"/></svg><b>2 repas</b>Manger</div>
+          <div><svg width="58" height="58" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--fresh2)" stroke-width="9"/><circle cx="38" cy="38" r="31" fill="none" stroke="var(--fresh)" stroke-width="9" stroke-linecap="round" stroke-dasharray="20 195" transform="rotate(-90 38 38)"/></svg><b>À faire</b>Bouger</div>
+        </div>
+        <div class="faire"><small>À faire maintenant</small><strong>Séance A · Maison</strong><span>Commencer la séance</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="fonctions">
+    <div class="wrap">
+      <h2 class="titre-sec">Tout ce qu'il faut, rien de plus</h2>
+      <p class="intro">Pensée pour les débutants qui veulent manger mieux et bouger plus, sans y passer des heures.</p>
+      <div class="grille">
+        <div class="carte"><div class="ico" style="background:var(--acc2);color:var(--acc)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18c0 5-4 8-9 8s-9-3-9-8zM9 3c-1 2 1 3 0 5M14 3c-1 2 1 3 0 5"/></svg></div><h3>58 recettes</h3><p>Protéinées, rassasiantes, avec les étapes détaillées et les calories calculées sur la table Ciqual de l'ANSES.</p></div>
+        <div class="carte"><div class="ico" style="background:var(--fresh2);color:var(--fresh)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg></div><h3>Sport sur mesure</h3><p>Programmes à la maison avec haltères, au parc sans matériel ou en salle. Chaque exercice est expliqué.</p></div>
+        <div class="carte"><div class="ico" style="background:var(--acc2);color:var(--acc)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3c2 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-4 2-7 2 1 3 3 3 5 1-2 1-5 1-9z"/></svg></div><h3>Une série à tenir</h3><p>Une séance ou un défi de 2 minutes suffit pour garder ta série. Un joker par semaine, des badges, des niveaux.</p></div>
+        <div class="carte"><div class="ico" style="background:var(--water2);color:var(--water)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg></div><h3>Eau et repas</h3><p>Un verre, une bouteille ou la quantité que tu veux en un geste. Scan des codes-barres pour les produits.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 class="titre-sec">Prêt en une minute</h2>
+      <p class="intro">Pas d'appli à télécharger dans un magasin : elle s'installe depuis ton navigateur.</p>
+      <div class="etapes">
+        <div class="etape"><h3>Choisis ton objectif</h3><p>Performances, muscle, perte de poids ou sèche : séances, recettes et calories s'adaptent. Deux questions, c'est tout.</p></div>
+        <div class="etape"><h3>Fais ta première séance</h3><p>À la maison, dehors ou en salle. Ensuite, un compte gratuit garde tes progrès sur tous tes téléphones.</p></div>
+        <div class="etape"><h3>Ajoute-la à ton écran</h3><p>Sur iPhone : Safari, bouton Partager, puis « Sur l'écran d'accueil ». Elle marche même sans réseau.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="bandeau">
+        <div>
+          <h2>Rejoins les premiers utilisateurs</h2>
+          <p>CookYourself vient de naître : tout est gratuit, et ton avis nous aide à l'améliorer. Une fois connecté, un formulaire « Ton avis nous aide » t'attend dans les réglages.</p>
+        </div>
+        <a class="btn" href="/app/">Je commence gratuitement</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 class="titre-sec">Tes données restent à toi</h2>
+      <ul class="liste">
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span><b>Hébergées en Europe</b>, à Paris, et visibles par toi seul.</span></li>
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span><b>Aucune pub, aucun traqueur.</b> On ne vend rien de ce que tu notes.</span></li>
+        <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span><b>Export de tes données et suppression de ton compte</b> à tout moment, depuis les réglages.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2 class="titre-sec">Questions fréquentes</h2>
+      <details><summary>C'est vraiment gratuit ?</summary><p>Oui, pendant toute la phase de lancement. Plus tard, une formule CookYourself+ à petit prix ajoutera des menus et des programmes complets ; l'essentiel restera gratuit.</p></details>
+      <details><summary>Faut-il être sportif ?</summary><p>Non. Les programmes sont faits pour débuter, chaque mouvement est expliqué, et les défis du jour existent en version facile.</p></details>
+      <details><summary>Ça remplace un médecin ou un diététicien ?</summary><p>Non. CookYourself est une appli de bien-être. Les calories sont des estimations. En cas de doute sur ta santé, demande l'avis d'un professionnel.</p></details>
+      <details><summary>Comment l'installer sur iPhone ?</summary><p>Ouvre cookyourself.fitness dans Safari, touche Partager, fais défiler et choisis « Sur l'écran d'accueil ». Si l'option manque, touche « Modifier les actions » pour l'ajouter.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 CookYourself</span>
+    <span><a href="/app/confidentialite">Confidentialité</a> · <a href="/app/">Ouvrir l'appli</a></span>
+  </div>
+</footer>
+</body>
+</html>
