@@ -61,10 +61,13 @@
     var dist;
     try { dist = await lireEnLigne(); } catch (e) { etat('Pas de réseau : tes données restent sur ce téléphone.', 1); return; }
     var loc = U.db();
-    /* Données d'un autre compte sur ce téléphone : on ne les mélange jamais. */
-    if (loc.compteId && loc.compteId !== user.id){ choix(dist, 'autre'); return; }
-    /* Première connexion avec des données des deux côtés : on demande. */
-    if (!loc.compteId && !vide(loc) && dist && !vide(dist)){ choix(dist, 'premiere'); return; }
+    /* Données d'un autre compte sur ce téléphone : on ne les mélange jamais. Le compte est obligatoire, donc elles sont
+       déjà sauvegardées en ligne sur l'autre compte : on les remplace par celles du compte connecté (vides pour un nouveau compte). */
+    if (loc.compteId && loc.compteId !== user.id){
+      var neuf = dist && dist.jours ? JSON.parse(JSON.stringify(dist)) : { jours:{}, reglages:{ poids:75, base:3.5, eau:8, cache:false }, favoris:[] };
+      neuf.compteId = user.id; U.remplacer(neuf); if (dist && dist.jours) return; try { await pousser(); } catch(e){} return;
+    }
+    /* Données notées sur ce téléphone avant la connexion : on les réunit avec celles du compte (sans question). */
     try { var f = fusion(loc, dist); f.compteId = user.id; U.remplacer(f); await pousser(); }
     catch (e) { etat('Erreur pendant la synchronisation. Tes données restent sur ce téléphone.', 1); }
   }
@@ -229,7 +232,10 @@
     porte.remove(); porte = null; bloquer(false);
   }
   /* Après la connexion : si ce compte a déjà fait le premier lancement (sur un autre appareil), on ne le refait pas. On arrive sur l'accueil. */
-  function apresConnexion(){ var d = U.db(), o = document.querySelector('.onb'); if (o && d && d.onb) { o.remove(); bloquer(false); } if (!document.querySelector('.onb')) { var n = document.querySelector('nav [data-v="jour"]'); if (n) n.click(); } }
+  function apresConnexion(){ var d = U.db(), o = document.querySelector('.onb');
+    if (o && d && d.onb) { o.remove(); bloquer(false); }
+    if (d && !d.onb && !o) { setTimeout(function(){ location.replace(location.pathname); }, 300); return; }   /* le premier lancement démarre au chargement */
+    if (!document.querySelector('.onb')) { var n = document.querySelector('nav [data-v="jour"]'); if (n) n.click(); } }
   window.CYporte = { ouverte: function(){ return !!porte; } };
 
   async function demarrer(){
@@ -250,12 +256,11 @@
     sb.auth.onAuthStateChange(function(ev, session){ if (ev === 'SIGNED_OUT') modeReset = false; if (ev === 'PASSWORD_RECOVERY') { modeReset = true; user = session ? session.user : null; var nr = document.querySelector('[data-v="regl"]'); if (nr) nr.click(); dessiner(); return; } var avant = user; user = session ? session.user : null; if (user) fermerPorte(); if (!avant && user) { lirePlan().then(dessiner); dessiner(); Promise.resolve(synchro()).then(apresConnexion, apresConnexion); } else if (avant && !user) { dessiner(); ouvrirPorte(); } });
     var s = await sb.auth.getSession(); user = s.data.session ? s.data.session.user : null; pretOk(true);
     if (user) fermerPorte(); else ouvrirPorte();
-    if (erreurLien) { history.replaceState(null, '', location.pathname); var nr2 = document.querySelector('[data-v="regl"]'); if (nr2) nr2.click(); dessiner(); etat('Ce lien a expiré ou a déjà servi. Retourne dans l\'appli et redemande un e-mail.', 1); return; }
+    if (erreurLien) { history.replaceState(null, '', location.pathname); if (!user) ouvrirPorte(); dessiner(); etat('Ce lien a expiré ou a déjà servi. Retourne dans l\'appli et redemande un e-mail.', 1); return; }
     if (typeLien === 'signup' || typeLien === 'magiclink') {
       history.replaceState(null, '', location.pathname);
       if (user) { await sb.auth.signOut(); user = null; }
-      if (document.querySelector('.onb')) return;   /* le premier lancement affiche déjà « Connecte-toi » avec le message */
-      vue = 'connexion'; var nr3 = document.querySelector('[data-v="regl"]'); if (nr3) nr3.click(); dessiner(); etat('Ton compte a bien été validé ✓ Connecte-toi pour commencer.'); return;
+      vue = 'connexion'; ouvrirPorte(); etat('Ton compte a bien été validé ✓ Connecte-toi pour commencer.'); return;
     }
     if (modeReset) { var nr4 = document.querySelector('[data-v="regl"]'); if (nr4) nr4.click(); }
     dessiner();
