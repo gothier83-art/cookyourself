@@ -17,7 +17,7 @@
 @font-face{font-family:Fredoka;src:url(fonts/fredoka.woff2) format("woff2");font-weight:300 700;font-display:swap}
 @font-face{font-family:Inter;src:url(fonts/inter.woff2) format("woff2");font-weight:100 900;font-display:swap}
 :root{--bg:#fbf6ee;--card:#fff;--ink:#2a1f17;--mute:#6b5a4c;--acc:#c2410c;--acc2:#fde8d7;--acc-ink:#9a3412;--on-acc:#fff;--line:#eadfce;--fresh:#15803d;--fresh2:#dcfce7;--water:#0369a1;--water2:#e0f2fe;--water-ink:#075985;--soft:#fff3e6;--flamme:#c2410c;--on-water:#fff;--danger:#b91c1c}
-@media (prefers-color-scheme:dark){:root{--bg:#17110d;--card:#221a14;--ink:#f6ede4;--mute:#b9a796;--acc:#fb923c;--acc2:#3a2416;--acc-ink:#fdba74;--on-acc:#1a0f08;--line:#33271e;--fresh:#4ade80;--fresh2:#14301f;--water:#38bdf8;--water2:#0c2a3a;--water-ink:#7dd3fc;--soft:#2b1d13;--flamme:#fb923c;--on-water:#062033;--danger:#f87171}}
+@media (prefers-color-scheme:dark){:root{--bg:#17110d;--card:#221a14;--ink:#f6ede4;--mute:#b9a796;--acc:#fb923c;--acc2:#3a2416;--acc-ink:#fdba74;--on-acc:#1a0f08;--line:#33271e;--fresh:#4ade80;--fresh2:#14301f;--water:#38bdf8;--water2:#123a50;--water-ink:#7dd3fc;--soft:#2b1d13;--flamme:#fb923c;--on-water:#062033;--danger:#f87171}}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:520px;margin:0 auto;padding:16px 16px 96px}
 h1{font-size:20px;margin:4px 0 2px}.sub{color:var(--mute);font-size:13px;margin:0 0 14px}
@@ -107,6 +107,32 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
 #persoListe button,#seListe button{min-width:44px;min-height:44px}
 #jSomH::-webkit-slider-thumb{width:28px;height:28px}
 .points{display:flex;gap:6px}.points i{width:28px;height:6px;border-radius:3px;background:var(--line)}.points i.on{background:var(--acc)}
+/* ===== Coach, sommeil, chrono (2026-11-20) ===== */
+:root{--sleep:#6d28d9;--sleep2:#ede9fe}
+@media (prefers-color-scheme:dark){:root{--sleep:#a78bfa;--sleep2:#2a1f45}}
+.anneaux{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.anneaux svg{width:64px;height:64px}.anneaux b{font-size:16px}
+#pSemaine.anneaux{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.objg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.objg button{min-height:64px;text-align:left;background:var(--soft);color:var(--ink);border:2px solid var(--line);line-height:1.25}
+.chiffres{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chiffres span{background:var(--soft);border-radius:12px;padding:6px 10px;font-size:14px}.chiffres b{font-family:Fredoka,Inter,sans-serif}
+.ins{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.insIc{width:40px;height:40px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+.ins .est{margin-top:2px}.ins .lien{margin-top:2px}
+.brow{margin-top:10px}.blbl{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:600;margin-bottom:2px}.blbl i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:0}.blbl .est{font-weight:400;font-size:13px;text-align:right}
+.bx{display:flex;font-size:11px;color:var(--mute);text-align:center;margin-top:4px}.bx span{display:block}
+.bdet{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px}
+.voile{position:fixed;inset:0;z-index:120;background:rgba(20,10,5,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom))}
+.poignee{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.chrono{position:fixed;z-index:60;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));max-width:496px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:20px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.chrono #chLbl{color:inherit;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;font-size:15px}
+.chT{font-family:Fredoka,Inter,sans-serif;font-size:64px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1;text-align:center;margin:2px 0 8px}
+.chB{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.chrono button{background:color-mix(in srgb,var(--bg) 18%,transparent);color:inherit;min-width:0;min-height:56px;font-size:18px;padding:8px}
+.chrono #chPasser{background:var(--acc);color:var(--on-acc)}
+.chrono .bar{background:color-mix(in srgb,var(--bg) 20%,transparent);height:10px;margin-top:10px}.chrono .bar i{background:var(--acc);transition:width .25s linear}
+@media (prefers-color-scheme:dark){.chrono{background:#000;color:#fff;border:1px solid var(--line)}.chrono button{background:#2a2a2a}}
+body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toast{bottom:calc(290px + env(safe-area-inset-bottom))}
+.anneaux .est{white-space:nowrap}.seg button{min-height:48px}.anneau-btn{cursor:pointer;border-radius:14px}
+.bnav{display:flex;align-items:center;gap:8px}.bnav button{min-width:48px;min-height:48px;padding:0;font-size:22px;flex:0 0 auto}.bnav div{flex:1}
+.sheet .lien{min-height:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -126,22 +152,24 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
     <div class="card" id="jSommeil"></div>
     <div class="card">
       <div class="anneaux">
-        <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aEauSvg" aria-label="Eau"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--water2)" stroke-width="9"/><circle id="aEau" cx="38" cy="38" r="31" fill="none" stroke="var(--water)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b><span id="eau">0</span> L</b><span class="est">Eau · sur <span id="eauObj">2</span> L</span></div>
+        <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aEauSvg" aria-label="Eau"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--water2)" stroke-width="9"/><circle id="aEau" cx="38" cy="38" r="31" fill="none" stroke="var(--water)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b><span id="eau">0</span>/<span id="eauObj">2</span> L</b><span class="est">Eau</span></div>
+        <div class="anneau-btn" id="aSommeilBtn" role="button" tabindex="0" aria-label="Sommeil : modifier"><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aSommeilSvg" aria-label="Sommeil"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--sleep2)" stroke-width="9"/><circle id="aSommeil" cx="38" cy="38" r="31" fill="none" stroke="var(--sleep)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aSommeilTxt">—</b><span class="est">Sommeil</span></div>
         <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aRepasSvg" aria-label="Repas"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--acc2)" stroke-width="9"/><circle id="aRepas" cx="38" cy="38" r="31" fill="none" stroke="var(--acc)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aRepasTxt">0 repas</b><span class="est">Manger</span></div>
         <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aBougerSvg" aria-label="Bouger"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--fresh2)" stroke-width="9"/><circle id="aBouger" cx="38" cy="38" r="31" fill="none" stroke="var(--fresh)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aBougerTxt">À faire</b><span class="est">Bouger</span></div>
       </div>
       <div class="bar hide" aria-hidden="true"><i id="eauBar"></i></div>
       <div id="jMacros" class="macros"></div>
     </div>
+    <div class="card hero" id="jAFaire"></div>
     <div class="eau3" role="group" aria-label="Ajouter de l'eau" style="margin:0 0 6px">
       <button data-ml="250">+ Verre<br>25 cl</button>
       <button data-ml="500">+ Bouteille<br>50 cl</button>
-      <form id="eauForm"><input id="eauLibre" aria-label="Autre quantité d'eau en centilitres" type="number" inputmode="numeric" placeholder="Autre"><span style="font-weight:600;font-size:14px;margin:0 4px;color:var(--water-ink)">cl</span><button id="plusEau" type="submit" aria-label="Ajouter cette quantité d'eau">+</button></form>
+      <form id="eauForm"><input id="eauLibre" aria-label="Autre quantité d'eau en centilitres" type="number" inputmode="numeric" placeholder="cl"><button id="plusEau" type="submit" aria-label="Ajouter cette quantité d'eau">+</button></form>
     </div>
     <div style="text-align:right;margin:0 0 10px"><button class="lien" id="moinsEau">Annuler la dernière boisson</button></div>
-    <div class="card hero" id="jAFaire"></div>
     <div class="card hide" id="jProfil"></div>
     <div class="card hide" id="jCompte"></div>
+    <div class="card hide" id="jCoach"></div>
     <div class="card" id="jIdee" style="padding:14px"></div>
 
 
@@ -208,6 +236,7 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   <section id="v-recettes" class="hide">
     <div class="seg" role="group" aria-label="Choisir la vue"><button data-v="recettes" aria-pressed="false">Recettes</button><button data-v="manger" aria-pressed="false">Ce que j'ai mangé</button></div>
     <div id="rListeBloc">
+      <div class="card hide" id="rObjectif"></div>
       <div class="card" style="padding:12px 16px">
         <input id="rCherche" type="search" aria-label="Chercher une recette" placeholder="Chercher une recette" style="margin-bottom:6px">
         <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="proteines">Protéiné</button><button data-rf="rapide">Rapide</button><button data-rf="vege">Végé</button><button data-rf="batch">Batch</button></div>
@@ -262,7 +291,8 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
     <div class="card">
       <div class="lbl">Où t'entraînes-tu ?</div>
       <div class="chips" role="group" aria-label="Lieu d'entraînement" style="margin-top:8px"><button data-lieu="maison">🏠 Maison (haltères)</button><button data-lieu="calis">🌳 Callisthénie</button><button data-lieu="salle">🏋️ Salle</button></div>
-      <div class="lbl" style="margin-top:12px">Programme débutant · <span id="lieuNom"></span> · 3 séances par semaine (A, B, A puis B, A, B…)</div>
+      <div id="entrMode"></div>
+      <div class="lbl" style="margin-top:12px;font-weight:600;color:var(--ink)" id="progTitre"></div>
       <div class="chips" id="progChoix" style="margin-top:8px"><button data-prog="A">Séance A</button><button data-prog="B">Séance B</button></div>
       <ul id="progListe"></ul>
       <div class="est" id="progInfo" style="margin-top:6px"></div>
@@ -278,17 +308,19 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
       <div class="lbl" id="exoMuscles"></div>
       <div style="font-weight:700;font-size:18px;margin:4px 0" id="exoNom"></div>
       <div class="est" id="exoObjectif"></div>
+      <div class="est" id="cfgLigne" style="margin-top:4px"></div>
       <details style="margin:8px 0"><summary style="cursor:pointer;color:var(--acc)">Comment faire le mouvement</summary><div id="exoFiche" style="font-size:15px;margin-top:6px"></div></details>
       <button class="main" id="seRefaire" style="margin-top:8px" hidden></button>
       <div class="row" style="margin-top:6px">
-        <input id="seKg" aria-label="Charge en kg" type="number" inputmode="decimal" placeholder="charge (kg)">
-        <input id="seRep" aria-label="Répétitions" type="number" inputmode="numeric" placeholder="répétitions">
-        <button id="seAj" style="flex:0 0 auto">+ Série</button>
+        <label id="seKgL" style="margin:0">Charge (kg)<input id="seKg" type="number" inputmode="decimal" placeholder="kg" style="margin-top:4px"></label>
+        <label style="margin:0"><span id="seRepT">Répétitions</span><input id="seRep" type="number" inputmode="numeric" placeholder="rép." style="margin-top:4px"></label>
+        <button id="seAj" style="flex:0 0 auto;align-self:flex-end;min-height:52px">+ Série</button>
       </div>
       <div class="chips" role="group" aria-label="Réglage rapide" style="margin-top:8px"><button data-pas="kg:-2.5" class="pasKg" aria-label="Moins 2,5 kilos">−2,5 kg</button><button data-pas="kg:2.5" class="pasKg" aria-label="Plus 2,5 kilos">+2,5 kg</button><button data-pas="rep:-1" aria-label="Une répétition de moins">−1</button><button data-pas="rep:1" aria-label="Une répétition de plus">+1</button></div>
       <div class="est" id="seDernier" style="margin-top:6px"></div>
       <ul id="seListe"></ul>
-      <div class="row" style="margin-top:8px"><button id="tempoBtn">▶ Tempo 3-1-1 (bips)</button><button id="reposBtn">⏱ Repos 90 s</button></div>
+      <div id="exoSuite"></div>
+      <div class="row" style="margin-top:8px"><button id="tempoBtn">▶ Tempo 3-1-1 (bips)</button><button id="reposBtn">⏱ Relancer le repos</button></div>
       <div class="est" id="tempoInfo" style="margin-top:6px"></div>
     </div>
     <div class="card">
@@ -337,6 +369,8 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   <!-- HISTORIQUE -->
   <section id="v-histo" class="hide">
     <h2 class="rt" style="font-size:28px;margin:0 0 12px">Progrès</h2>
+    <div class="card" id="coachCard"></div>
+    <div class="card" id="bilanCard"></div>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <div style="flex:1"><div class="lbl" id="gNiveau">Niveau 1 · Apprenti</div><div class="est" id="gXp"></div></div>
@@ -345,6 +379,7 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
     </div>
     <div class="card" id="pCoach"></div>
     <div class="card" id="pForce"></div>
+    <div class="card" id="exoEvol"></div>
     <div class="card"><div class="lbl" style="font-weight:600;color:var(--ink)">Depuis lundi</div><div id="pSemaine" class="anneaux" style="margin-top:10px"></div></div>
     <div class="card">
       <div class="lbl" style="margin-top:12px">Badges <span class="est" id="gBadgesNb"></span></div>
@@ -444,6 +479,11 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   <button data-v="seance"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="pointer-events:none"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></svg></span>Bouger</button>
   <button data-v="histo"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="pointer-events:none"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Progrès</button>
 </nav>
+<div class="chrono hide" id="chrono" role="timer" aria-label="Chrono de repos">
+  <div class="lbl" id="chLbl">Repos</div><div class="chT" id="chT">0:00</div>
+  <div class="chB"><button id="chMoins" aria-label="Retirer 15 secondes">−15 s</button><button id="chPlus" aria-label="Ajouter 15 secondes">+15 s</button><button id="chPasser">Passer</button></div>
+  <div class="bar" aria-hidden="true"><i id="chBar" style="width:0"></i></div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="config.js"></script>
@@ -521,7 +561,7 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   function histo(){
     var out=[];for(var i=0;i<7;i++){var d=new Date();d.setDate(d.getDate()-i);var k=cle(d),j=db.jours[k];
       var lab=i===0?"Aujourd'hui":d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
-      out.push('<li><span>'+lab+'</span><span class="est">'+(j?L(ml(j)):0)+' L d\'eau · '+(j?j.repas.length:0)+' repas · '+(j?j.seances.length:0)+' séance(s)</span></li>')}
+      out.push('<li><span>'+lab+'</span><span class="est">'+(j&&j.sommeil&&j.sommeil.h?String(j.sommeil.h).replace('.',',')+' h de sommeil · ':'')+(j?L(ml(j)):0)+' L d\'eau · '+(j?j.repas.length:0)+' repas · '+(j?j.seances.length:0)+' séance(s)</span></li>')}
     $('histo').innerHTML=out.join('');
   }
   function boire(q){var j=jour();j.ml=ml(j)+q;(j.prises=j.prises||[]).push(q);j.eau=Math.round(j.ml/250);save();rendre();if(navigator.vibrate)navigator.vibrate(15);toast('+'+(q/10)+' cl')}
@@ -712,17 +752,20 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
     calis:{nom:'Callisthénie (sans matériel, dehors ou maison)',A:['squatpdc','pompes','tractions','gainage'],B:['fentes','dips','pont','grimpeur']}};
   var lieu='maison';try{lieu=localStorage.getItem('cy.lieu')||'maison'}catch(e){}if(!LIEUX[lieu])lieu='maison';
   var PROG=LIEUX[lieu];
-  var cur=null, prog='A';
-  window.CYsport={prog:function(){return prog},liste:function(){return PROG[prog]},exo:function(k){return EXOS[k]},nomLieu:function(){return LIEUX[lieu].nom.split(' (')[0]}};
+  var cur=null, prog='A', CUSTOM=null, hOuv=[], hSer=[];
+  function nbS(e){return (window.CYchrono&&window.CYchrono.series())||e.series}
+  window.CYsport={prog:function(){return CUSTOM?CUSTOM.court:prog},liste:function(){return CUSTOM?CUSTOM.k:PROG[prog]},exo:function(k){return EXOS[k]},nomLieu:function(){return LIEUX[lieu].nom.split(' (')[0]},
+    ajouter:function(k,o){EXOS[k]=o},lieu:function(){return lieu},custom:function(c){CUSTOM=c;if(cur&&c&&c.k.indexOf(cur)<0){cur=null;$('exoCard').classList.add('hide')}rendreProg()},rendre:function(){rendreProg();rendreSeries()},
+    courant:function(){return cur},cles:function(){return Object.keys(EXOS)},surOuvrir:function(f){hOuv.push(f)},surSerie:function(f){hSer.push(f)}};
   function db(){return window.UnGeste.db()}
   function jourS(){var j=window.UnGeste.jour();if(!j.series)j.series=[];return j}
   function dernier(exo){var J=db().jours,ks=Object.keys(J).sort().reverse(),today=window.UnGeste.cle();
     for(var i=0;i<ks.length;i++){if(ks[i]===today)continue;var s=(J[ks[i]].series||[]).filter(function(x){return x.exo===exo});if(s.length)return{d:ks[i],s:s}}return null}
   function conseil(exo){var e=EXOS[exo],d=dernier(exo);if(!d)return 'Première fois : prends une charge légère et vise un geste propre.';
     var best=d.s.reduce(function(a,b){return(b.kg||0)>(a.kg||0)?b:a},d.s[0]),txt='Dernière fois ('+d.d.split('-').reverse().slice(0,2).join('/')+') : '+d.s.map(function(x){return (x.kg?x.kg+' kg × ':'')+x.rep+(e.unite||'')}).join(', ')+'.';
-    var toutes=d.s.length>=e.series&&d.s.every(function(x){return x.rep>=e.reps+2});
-    if(toutes&&e.poids&&best.kg)txt+=' 👍 Tu as dépassé l\'objectif : essaie '+(Math.round(best.kg*1.05*2)/2)+' kg (environ +5 %).';
-    else if(toutes)txt+=' 👍 Objectif dépassé : ajoute 2 répétitions'+(e.unite?' (ou 10 s)':'')+'.';
+    var toutes=d.s.length>=nbS(e)&&d.s.every(function(x){return x.rep>=e.reps});
+    if(toutes&&e.poids&&best.kg)txt+=' 👍 Toutes tes séries en haut de la fourchette : passe à '+String(best.kg+(e.base?2.5:1)).replace('.',',')+' kg.';
+    else if(toutes)txt+=' 👍 Objectif atteint : ajoute 1 à 2 répétitions'+(e.unite?' (ou 10 s)':'')+'.';
     return txt}
   function chargerPerso(){(db().exosPerso||[]).forEach(function(x){EXOS[x.id]=X(x.nom,'Mon exercice',x.duree?'3 fois 20 à 45 secondes':x.poids?'3 séries de 10':'3 séries de 8 à 12',x.duree?30:10,x.poids&&!x.duree,['Ton exercice à toi : note '+(x.duree?'la durée':'la charge et les répétitions')+', l\'appli suit tes progrès comme pour les autres.'],x.duree?'s':undefined)})}
   function rendrePerso(){chargerPerso();var L=(db().exosPerso||[]).filter(function(x){return!x.archive}),j=jourS();$('persoLbl').hidden=!L.length;
@@ -730,15 +773,15 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   var ptype=1;$('persoAj').onclick=function(){var f=$('persoForm');f.hidden=!f.hidden;if(!f.hidden)$('persoNom').focus()};
   $('persoOk').onclick=function(){var n=$('persoNom').value.trim().slice(0,60);if(!n){toast_('Donne un nom à ton exercice');$('persoNom').focus();return}var D=db();D.exosPerso=D.exosPerso||[];if(D.exosPerso.length>=30&&!D.exosPerso.some(function(x){if(x.archive){D.exosPerso.splice(D.exosPerso.indexOf(x),1);return true}})){toast_('30 exercices maximum');return}
     var id='perso'+Date.now();D.exosPerso.push({id:id,nom:n,poids:ptype===1,duree:ptype===2});window.UnGeste.save();$('persoNom').value='';$('persoForm').hidden=true;rendreProg();ouvrir(id);toast_('Exercice ajouté')};
-  function rendreProg(){rendrePerso();setTimeout(function(){if(window.CYvivant)window.CYvivant()},0);document.querySelectorAll('[data-lieu]').forEach(function(b){var on=b.dataset.lieu===lieu;b.style.fontWeight=on?'700':'400';b.setAttribute('aria-pressed',on)});$('lieuNom').textContent=LIEUX[lieu].nom;
+  function rendreProg(){rendrePerso();setTimeout(function(){if(window.CYvivant)window.CYvivant()},0);document.querySelectorAll('[data-lieu]').forEach(function(b){var on=b.dataset.lieu===lieu;b.style.fontWeight=on?'700':'400';b.setAttribute('aria-pressed',on)});$('progTitre').textContent=CUSTOM?CUSTOM.titre:'Programme débutant · '+LIEUX[lieu].nom+' · 3 séances par semaine (A, B, A puis B…)';
     document.querySelectorAll('[data-prog]').forEach(function(b){b.style.fontWeight=b.dataset.prog===prog?'700':'400';b.setAttribute('aria-pressed',b.dataset.prog===prog)});
-    var j=jourS();$('progListe').innerHTML=PROG[prog].map(function(k){var n=j.series.filter(function(x){return x.exo===k}).length,e=EXOS[k];
-      return '<li><span>'+esc(e.nom)+' <span class="est">· '+e.obj+'</span></span><button data-exo="'+k+'">'+(n?n+'/'+e.series+' ✓':'Ouvrir')+'</button></li>'}).join('');
+    var j=jourS(),LK=(CUSTOM?CUSTOM.k:PROG[prog]).filter(function(k){return EXOS[k]});$('progListe').innerHTML=LK.map(function(k){var n=j.series.filter(function(x){return x.exo===k}).length,e=EXOS[k];
+      return '<li><span>'+esc(e.nom)+' <span class="est">· '+esc(e.obj)+'</span></span><button data-exo="'+k+'" aria-label="'+(n?esc(e.nom)+' : '+n+' séries sur '+nbS(e):'Ouvrir '+esc(e.nom))+'">'+(n?n+'/'+nbS(e)+(n>=nbS(e)?' ✓':''):'Ouvrir')+'</button></li>'}).join('');
     var nb=Object.keys(db().jours).filter(function(k){return(db().jours[k].series||[]).length}).length;
     $('progInfo').textContent='Séances avec des séries notées : '+nb+'. Laisse au moins un jour de repos entre deux séances.'}
   function ouvrir(k){cur=k;var e=EXOS[k];$('exoCard').classList.remove('hide');$('exoNom').textContent=e.nom;$('exoMuscles').textContent=e.muscles;$('exoObjectif').textContent='Objectif : '+e.obj;
     $('exoFiche').innerHTML=e.fiche.map(function(p){return '<p style="margin:4px 0">'+p+'</p>'}).join('');
-    $('seKg').style.display=e.poids?'':'none';document.querySelectorAll('.pasKg').forEach(function(b){b.hidden=!e.poids});$('seRep').placeholder=e.unite?'secondes':'répétitions';rendreSeries();$('exoCard').scrollIntoView({behavior:'smooth',block:'start'})}
+    $('seKgL').style.display=e.poids?'':'none';document.querySelectorAll('.pasKg').forEach(function(b){b.hidden=!e.poids});$('seRepT').textContent=e.unite?'Secondes':'Répétitions';$('seRep').placeholder=e.unite?'s':'rép.';rendreSeries();$('exoCard').scrollIntoView({behavior:'smooth',block:'start'});hOuv.forEach(function(f){f(k)})}
   function rendreSeries(){if(!cur)return;var e=EXOS[cur],s=jourS().series.map(function(x,i){x._i=i;return x}).filter(function(x){return x.exo===cur});
     $('seListe').innerHTML=s.map(function(x,n){return '<li><span>Série '+(n+1)+' : '+(x.kg?x.kg+' kg × ':'')+x.rep+(e.unite||' rép.')+'</span><button data-dels2="'+x._i+'" aria-label="Supprimer la série '+(n+1)+'">✕</button></li>'}).join('');
     $('seDernier').textContent=conseil(cur);
@@ -747,14 +790,14 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
     if(mod&&!$('seKg').value&&mod.kg)$('seKg').value=mod.kg;if(mod&&!$('seRep').value)$('seRep').value=mod.rep;
     if(mod){bR.hidden=false;bR.textContent='↻ Comme la dernière fois : '+(e.poids&&mod.kg?String(mod.kg).replace('.',',')+' kg × ':'')+mod.rep+(e.unite?' s':' rép.');bR.onclick=function(){if(bR.disabled)return;bR.disabled=true;setTimeout(function(){bR.disabled=false},1000);ajSerie(mod.kg||0,mod.rep,true)}}else bR.hidden=true}
   function annuler(msg,fn){var t=document.getElementById('toast');t.setAttribute('role','status');t.innerHTML='';t.appendChild(document.createTextNode(msg+' '));var b=document.createElement('button');b.textContent='Annuler';b.style.cssText='margin-left:8px;min-height:36px;pointer-events:auto';b.onclick=function(){fn();t.classList.remove('on')};t.appendChild(b);t.classList.add('on');clearTimeout(annuler.tm);annuler.tm=setTimeout(function(){t.classList.remove('on')},5000)}
-  function ajSerie(kg,r,rapide){var e=EXOS[cur];var j=jourS();if(!j.debut)j.debut=Date.now();var se={exo:cur,kg:e.poids?kg:0,rep:r,t:Date.now()};j.series.push(se);window.UnGeste.save();$('seRep').value='';rendreSeries();rendreProg();
+  function ajSerie(kg,r,rapide){var e=EXOS[cur];var j=jourS();if(!j.debut)j.debut=Date.now();var se={exo:cur,kg:e.poids?kg:0,rep:r,t:Date.now()};j.series.push(se);window.UnGeste.save();$('seRep').value='';rendreSeries();rendreProg();hSer.forEach(function(f){f(cur)});
     if(navigator.vibrate)navigator.vibrate(15);if(!rapide){toast_('Série notée');return}
     annuler('Série notée',function(){var i=jourS().series.indexOf(se);if(i>=0){jourS().series.splice(i,1);var D4=db();D4.supp=D4.supp||{};D4.supp[se.t]=1;window.UnGeste.save();rendreSeries();rendreProg()}})}
   $('seAj').onclick=function(){if(!cur)return;var kg=parseFloat(String($('seKg').value).replace(',','.'))||0,r=parseInt($('seRep').value,10)||0;if(!r)return;ajSerie(kg,r)};
   document.addEventListener('click',function(ev){var d=ev.target.dataset;if(!d)return;
     if(d.lieu){lieu=d.lieu;PROG=LIEUX[lieu];try{localStorage.setItem('cy.lieu',lieu)}catch(e){}$('exoCard').classList.add('hide');cur=null;rendreProg()}
     if(d.prog){prog=d.prog;try{localStorage.setItem('ungeste.prog',prog)}catch(e){}rendreProg()}
-    if(d.exo)ouvrir(d.exo);
+    if(d.exo&&EXOS[d.exo])ouvrir(d.exo);
     if(d.pas){var pp=d.pas.split(':'),inp=$(pp[0]==='kg'?'seKg':'seRep'),v=(parseFloat(String(inp.value).replace(',','.'))||0)+parseFloat(pp[1]);inp.value=Math.max(0,Math.round(v*10)/10)}
     if(d.ptype!==undefined){ptype=+d.ptype;document.querySelectorAll('[data-ptype]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.ptype===d.ptype)})}
     if(d.delperso){var D3=db(),xa=(D3.exosPerso||[]).filter(function(x){return x.id===d.delperso})[0];if(!xa)return;xa.archive=true;if(cur===d.delperso){cur=null;$('exoCard').classList.add('hide')}window.UnGeste.save();rendreProg();annuler('Exercice retiré',function(){xa.archive=false;window.UnGeste.save();rendreProg()})}
@@ -762,17 +805,16 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   /* Tempo 3-1-1 et repos, avec bips (Web Audio) */
   var ac=null,timer=null;
   function bip(f,ms){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=0.15;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}if(navigator.vibrate)navigator.vibrate(ms)}
-  function stop(){clearInterval(timer);timer=null;$('tempoBtn').textContent='▶ Tempo 3-1-1 (bips)';$('reposBtn').textContent='⏱ Repos 90 s';$('tempoInfo').textContent=''}
+  function stop(){clearInterval(timer);timer=null;$('tempoBtn').textContent='▶ Tempo 3-1-1 (bips)';$('tempoInfo').textContent=''}
   $('tempoBtn').onclick=function(){if(timer){stop();return}var seq=[['Descends',3,440],['Pause',1,660],['Remonte',1,880]],i=0,s=0,rep=1;this.textContent='■ Arrêter';
     function tick(){var ph=seq[i];if(s===0)bip(ph[2],120);$('tempoInfo').textContent='Répétition '+rep+' · '+ph[0]+' ('+(ph[1]-s)+')';s++;if(s>=ph[1]){s=0;i++;if(i>=seq.length){i=0;rep++;if(rep>15)stop()}}}
     tick();timer=setInterval(tick,1000)};
-  $('reposBtn').onclick=function(){if(timer){stop();return}var r=90;this.textContent='■ Arrêter';$('tempoInfo').textContent='Repos : '+r+' s';
-    timer=setInterval(function(){r--;$('tempoInfo').textContent='Repos : '+r+' s';if(r===10)bip(660,120);if(r<=0){bip(880,400);stop();toast_('Série suivante !')}},1000)};
   $('finSeance').onclick=function(){var j=jourS();if(!j.series.length){$('finInfo').textContent='Note au moins une série avant de terminer.';return}
     var min=Math.max(10,Math.round((Date.now()-(j.debut||j.series[0].t))/60000));if(min>180)min=60;
-    var noms=[];j.series.forEach(function(x){if(!EXOS[x.exo])return;var n=EXOS[x.exo].nom.split(' (')[0];if(noms.indexOf(n)<0)noms.push(n)});
-    window.UnGeste.ajouterSeance(3.5,min,'Séance '+prog+' ('+LIEUX[lieu].nom.split(' (')[0]+') : '+noms.join(', '));j.debut=null;window.UnGeste.save();
-    prog=prog==='A'?'B':'A';try{localStorage.setItem('ungeste.prog',prog)}catch(e){}rendreProg();$('finInfo').textContent='Séance enregistrée ('+min+' min). La prochaine sera la séance '+prog+'.';stop()};
+    var noms=[];j.series.forEach(function(x){if(x.fin)return;var n=EXOS[x.exo]?EXOS[x.exo].nom.split(' (')[0]:'Exercice';if(noms.indexOf(n)<0)noms.push(n)});
+    if(!noms.length){$('finInfo').textContent='Séance déjà enregistrée. Note de nouvelles séries pour en ajouter une autre.';return}
+    window.UnGeste.ajouterSeance(3.5,min,'Séance '+(CUSTOM?CUSTOM.court:prog)+' ('+LIEUX[lieu].nom.split(' (')[0]+') : '+noms.join(', '));j.series.forEach(function(x){x.fin=1});j.debut=null;window.UnGeste.save();
+    if(!CUSTOM){prog=prog==='A'?'B':'A';try{localStorage.setItem('ungeste.prog',prog)}catch(e){}}rendreProg();$('finInfo').textContent='Séance enregistrée ('+min+' min).'+(CUSTOM?'':' La prochaine sera la séance '+prog+'.');stop();if(window.CYchrono&&window.CYchrono.arreter)window.CYchrono.arreter()};
   try{prog=localStorage.getItem('ungeste.prog')||'A'}catch(e){}if(prog!=='A'&&prog!=='B')prog='A';
   rendreProg();
 })();
@@ -796,6 +838,7 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   /* calories et protéines pour UNE portion */
   function valeurs(r){var k=0,p=0,gl=0,li=0,ok=true;r.ing.forEach(function(x){var a=C[x[1]];if(!a||a[1]==null){ok=false;return}k+=a[1]*x[2]/100;p+=(a[2]||0)*x[2]/100;gl+=(a[3]||0)*x[2]/100;li+=(a[4]||0)*x[2]/100});
     return{k:Math.round(k/r.portions),p:Math.round(p/r.portions),gl:Math.round(gl/r.portions),li:Math.round(li/r.portions),ok:ok}}
+  window.CYrecettes={valeurs:valeurs};
   var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin',batch:'batch cooking',rassasiant:'protéiné et léger',sansporc:'sans porc',sanslactose:'sans lactose',sansgluten:'sans gluten'};ICO.batch='🧊';
   function liste(){var h=R.filter(function(r){return !filtre||r.tags.indexOf(filtre)>=0}).map(function(r){var v=valeurs(r);
       return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+(r.portions>2?r.portions+' portions · ':'')+r.tags.map(function(t){return '<span aria-hidden="true">'+(ICO[t]||'')+'</span><span class="sr">'+(TXT[t]||t)+', </span>'}).join(' ')+'</span></span>'+
@@ -832,7 +875,10 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   function D(){var d=U.db();if(!d.profil)d.profil={sexe:'',age:'',taille:'',metier:'1.4',but:'0'};if(!d.poidsLog)d.poidsLog=[];if(!d.rappels)d.rappels={on:false,heures:['10:00','14:00','17:00']};return d}
   function toast(t){var e=$('toast');e.textContent=t;e.classList.add('on');setTimeout(function(){e.classList.remove('on')},1600)}
   function objectif(){var d=D(),p=d.profil,kg=d.reglages.poids,a=+p.age,t=+p.taille;if(!p.sexe||!a||!t)return null;
-    var bmr=10*kg+6.25*t-5*a+(p.sexe==='h'?5:-161),cible=bmr*(+p.metier)+(+p.but);cible=Math.max(cible,p.sexe==='h'?1500:1200);return Math.round(cible/10)*10}
+    var bmr=10*kg+6.25*t-5*a+(p.sexe==='h'?5:-161),tdee=bmr*(+p.metier),aj=+p.but||0;
+    /* garde-fous : déficit plafonné à 20 % de la dépense, jamais sous 1 200 kcal (femme) ou 1 500 kcal (homme) */
+    if(aj<0)aj=-Math.min(-aj,tdee*0.2);var cible=Math.max(tdee+aj,p.sexe==='h'?1500:1200);return Math.round(cible/10)*10}
+  window.CYkcal=objectif;
   function courbe(){var L=D().poidsLog.slice(-30);if(L.length<2)return L.length?'<span class="est">1 mesure : '+L[0].kg+' kg. Note-le plusieurs jours pour voir la courbe.</span>':'<span class="est">Aucune mesure.</span>';
     var ks=L.map(function(x){return x.kg}),mi=Math.min.apply(0,ks),ma=Math.max.apply(0,ks),r=(ma-mi)||1,W=300,H=80;
     var pts=L.map(function(x,i){return (i*W/(L.length-1)).toFixed(1)+','+(H-6-(x.kg-mi)/r*(H-12)).toFixed(1)}).join(' ');
@@ -840,7 +886,7 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
   window.CYsuivi=function(){var d=D(),o=objectif(),j=U.jour(),tot=0;j.repas.forEach(function(x){if(x.kcal)tot+=x.kcal});
     var sp=0;j.seances.forEach(function(s){sp+=s.kcal||0});
     if(o){var cible=o+sp,reste=cible-tot;$('objReste').textContent=(reste>=0?reste+' kcal restantes':(-reste)+' kcal au-dessus');
-      $('objDet').textContent='Objectif '+o+' kcal'+(sp?' + '+sp+' (sport)':'')+' · noté '+tot+' kcal';$('objBar').style.width=Math.min(100,tot/cible*100)+'%'}
+      $('objDet').textContent='Objectif '+o+' kcal'+(sp?' + '+sp+' (sport)':'')+' · noté '+tot+' kcal'+(window.CYobj?' · protéines ≈ '+Math.round(window.CYobj.GOAL[window.CYobj.but()].prot*d.reglages.poids)+' g':'');$('objBar').style.width=Math.min(100,tot/cible*100)+'%'}
     $('pCourbe').innerHTML=d.reglages.cache?'<span class="est">Chiffres cachés.</span>':courbe();
     var p=d.profil;$('pSexe').value=p.sexe;$('pAge').value=p.age;$('pTaille').value=p.taille;$('pMetier').value=p.metier;$('pBut').value=p.but;
     $('eRappel').checked=d.rappels.on;$('eListe').innerHTML=d.rappels.heures.filter(function(h){return /^\d\d:\d\d$/.test(h)}).sort().map(function(h){return '<button data-eh="'+h+'" aria-label="Retirer le rappel de '+h+'">'+h+' ✕</button>'}).join('')};
@@ -1155,6 +1201,8 @@ nav button.on{color:var(--acc);font-weight:700}nav button.on span.ic{background:
 })();
 </script>
 <script src="compte.js"></script>
+<script src="entrainement.js"></script>
+<script src="bilan.js"></script>
 <script>
 /* Mode hors ligne : seulement quand l'appli est hébergée en https (pas dans l'aperçu Claude ni en fichier local). */
 try{ if(location.protocol==='https:' && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){}) }catch(e){}
