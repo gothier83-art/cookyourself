@@ -34,7 +34,15 @@ ol.et{padding-left:20px;margin:8px 0 0}ol.et li{display:list-item;border:0;paddi
 .est{font-size:13px;color:var(--mute)}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chips button{padding:8px 12px;font-size:14px}
 .hide{display:none}.bar{height:10px;border-radius:6px;background:var(--acc2);overflow:hidden}.bar i{display:block;height:100%;background:var(--acc)}
 .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
-small a{color:var(--acc)}
+a{color:var(--acc)}
+/* Accessibilité : focus visible, touches d'au moins 44 px, texte caché pour lecteur d'écran */
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+nav button{min-height:48px;border-top:3px solid transparent;border-radius:0}nav button.on{border-top-color:var(--acc)}
+.chips button{min-height:44px}li button{min-width:44px;min-height:44px;padding:6px 12px}
+#rRetour{min-height:44px}input[type=checkbox]{width:24px;height:24px;flex:0 0 auto;accent-color:var(--acc)}
+@media (prefers-color-scheme:dark){.chips button.on{color:#062421}}
+h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -49,7 +57,7 @@ small a{color:var(--acc)}
         <div><div class="lbl">Eau aujourd'hui</div><div class="big"><span id="eau">0</span><span style="font-size:20px"> verres</span></div></div>
         <div style="text-align:right"><div class="lbl">objectif <span id="eauObj">8</span></div></div>
       </div>
-      <div class="bar" style="margin:10px 0 12px"><i id="eauBar" style="width:0"></i></div>
+      <div class="bar" aria-hidden="true" style="margin:10px 0 12px"><i id="eauBar" style="width:0"></i></div>
       <button class="main" id="plusEau">+1 verre</button>
       <div class="row" style="margin-top:8px"><button id="moinsEau">Annuler le dernier</button></div>
     </div>
@@ -57,10 +65,10 @@ small a{color:var(--acc)}
     <div class="card">
       <div class="lbl">Repas</div>
       <div class="row" style="margin-top:6px">
-        <input id="repasNom" placeholder="Ex. : salade de pâtes" autocomplete="off">
+        <input id="repasNom" aria-label="Nom du repas" placeholder="Ex. : salade de pâtes" autocomplete="off">
       </div>
       <div class="row num" style="margin-top:8px">
-        <input id="repasKcal" type="number" inputmode="numeric" placeholder="kcal (optionnel)">
+        <input id="repasKcal" aria-label="Calories (optionnel)" type="number" inputmode="numeric" placeholder="kcal (optionnel)">
         <button id="ajRepas" style="flex:0 0 auto">Ajouter</button>
       </div>
       <div class="chips" id="favoris"></div>
@@ -78,7 +86,7 @@ small a{color:var(--acc)}
   <section id="v-manger" class="hide">
     <div class="card">
       <div class="lbl">Chercher un aliment (table CIQUAL de l'ANSES)</div>
-      <input id="mQ" placeholder="Ex. : pomme, riz cuit, yaourt nature" autocomplete="off" style="margin-top:6px">
+      <input id="mQ" aria-label="Chercher un aliment" placeholder="Ex. : pomme, riz cuit, yaourt nature" autocomplete="off" style="margin-top:6px">
       <div class="est" id="mInfo" style="margin-top:6px"></div>
       <ul id="mRes"></ul>
     </div>
@@ -89,7 +97,7 @@ small a{color:var(--acc)}
         <input id="scanFile" type="file" accept="image/*" capture="environment" class="hide">
       </div>
       <div class="row" style="margin-top:8px">
-        <input id="codeMan" inputmode="numeric" placeholder="ou tape le code (8 à 14 chiffres)">
+        <input id="codeMan" aria-label="Code-barres" inputmode="numeric" placeholder="ou tape le code (8 à 14 chiffres)">
         <button id="codeOk" style="flex:0 0 auto">Chercher</button>
       </div>
       <div class="est" id="scanInfo" style="margin-top:6px"></div>
@@ -98,7 +106,7 @@ small a{color:var(--acc)}
       <div class="lbl" id="cSrc"></div>
       <div style="font-weight:700;margin:4px 0" id="cNom"></div>
       <div class="est num" id="cPour100"></div>
-      <label>Quantité (g ou ml)</label>
+      <label for="cG">Quantité (g ou ml)</label>
       <input id="cG" type="number" inputmode="numeric" value="100">
       <div class="lbl" style="margin-top:8px">Repères avec la main (approximatifs)</div><div class="chips"><button data-g="100" title="viande, poisson">✋ 1 paume ≈ 100 g</button><button data-g="150" title="riz, pâtes, légumes">✊ 1 poing ≈ 150 g</button><button data-g="30" title="noix, fruits secs">🤲 1 poignée ≈ 30 g</button><button data-g="15" title="beurre, huile, fromage">👍 1 pouce ≈ 15 g</button></div><div class="lbl" style="margin-top:8px">ou en grammes</div><div class="chips"><button data-g="30">30 g</button><button data-g="50">50 g</button><button data-g="100">100 g</button><button data-g="150">150 g</button><button data-g="200">200 g</button><button data-g="250">250 g</button></div>
       <div class="num" style="font-size:24px;font-weight:700;margin:10px 0" id="cKcal"></div>
@@ -119,18 +127,18 @@ small a{color:var(--acc)}
     <div id="rListeBloc">
       <div class="card" style="padding:12px 16px">
         <div class="lbl">Recettes simples et pas chères · calories calculées avec Ciqual</div>
-        <div class="chips" id="rFiltres"><button data-rf="" class="on">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button></div>
+        <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button></div>
       </div>
       <div id="rListe"></div>
     </div>
     <div id="rFiche" class="hide">
       <div class="card">
         <button id="rRetour" style="padding:6px 12px;font-size:14px">← Toutes les recettes</button>
-        <div style="font-weight:700;font-size:20px;margin:10px 0 2px" id="rNom"></div>
+        <h2 class="rt" id="rNom"></h2>
         <div class="est" id="rInfos"></div>
         <div class="num" style="margin-top:10px"><span style="font-size:26px;font-weight:700" id="rKcal"></span> <span class="est" id="rKcalDet"></span></div>
-        <label>Nombre de portions</label>
-        <div class="chips" id="rPortions"><button data-rp="1">1</button><button data-rp="2">2</button><button data-rp="3">3</button><button data-rp="4">4</button><button data-rp="6">6</button></div>
+        <div class="lbl" style="margin:8px 0 4px" id="rPortLbl">Nombre de portions</div>
+        <div class="chips" id="rPortions" role="group" aria-labelledby="rPortLbl"><button data-rp="1">1</button><button data-rp="2">2</button><button data-rp="3">3</button><button data-rp="4">4</button><button data-rp="6">6</button></div>
       </div>
       <div class="card"><div class="lbl">Ingrédients</div><ul id="rIng"></ul></div>
       <div class="card"><div class="lbl">Étapes</div><ol class="et" id="rEtapes"></ol></div>
@@ -155,8 +163,8 @@ small a{color:var(--acc)}
       <div class="est" id="exoObjectif"></div>
       <details style="margin:8px 0"><summary style="cursor:pointer;color:var(--acc)">Comment faire le mouvement</summary><div id="exoFiche" style="font-size:15px;margin-top:6px"></div></details>
       <div class="row" style="margin-top:6px">
-        <input id="seKg" type="number" inputmode="decimal" placeholder="charge (kg)">
-        <input id="seRep" type="number" inputmode="numeric" placeholder="répétitions">
+        <input id="seKg" aria-label="Charge en kg" type="number" inputmode="decimal" placeholder="charge (kg)">
+        <input id="seRep" aria-label="Répétitions" type="number" inputmode="numeric" placeholder="répétitions">
         <button id="seAj" style="flex:0 0 auto">+ Série</button>
       </div>
       <div class="est" id="seDernier" style="margin-top:6px"></div>
@@ -171,16 +179,16 @@ small a{color:var(--acc)}
     <div class="card"><div class="est">Conseils généraux pour adulte en bonne santé, pas un programme personnalisé. Échauffe-toi 5 à 10 minutes. Arrête en cas de douleur. Fiches en cours de relecture par un éducateur sportif diplômé.</div></div>
     <div class="card">
       <div class="lbl">Noter une autre activité (sans séries)</div>
-      <label>Type de séance</label>
+      <label for="sType">Type de séance</label>
       <select id="sType">
         <option value="3.5">Musculation classique (8-15 rép.) — MET 3,5</option>
         <option value="5.0">Musculation rapide / explosive — MET 5,0</option>
         <option value="6.0">Musculation « power » — MET 6,0</option>
         <option value="8.0">Circuit intense, peu de repos — MET 8,0</option>
       </select>
-      <label>Durée (minutes, pauses comprises)</label>
+      <label for="sDuree">Durée (minutes, pauses comprises)</label>
       <input id="sDuree" type="number" inputmode="numeric" value="45">
-      <label>Exercice principal (optionnel)</label>
+      <label for="sExo">Exercice principal (optionnel)</label>
       <input id="sExo" placeholder="Ex. : squat 4×10 à 50 kg">
       <div class="card num" style="margin:12px 0;background:var(--acc2);border:0">
         <div class="lbl">Estimation (méthode MET)</div>
@@ -192,8 +200,8 @@ small a{color:var(--acc)}
     <div class="card">
       <div class="lbl">Estimer ta charge max (1RM)</div>
       <div class="row" style="margin-top:6px">
-        <input id="rmKg" type="number" inputmode="decimal" placeholder="charge kg">
-        <input id="rmRep" type="number" inputmode="numeric" placeholder="répétitions">
+        <input id="rmKg" aria-label="Charge en kg" type="number" inputmode="decimal" placeholder="charge kg">
+        <input id="rmRep" aria-label="Nombre de répétitions" type="number" inputmode="numeric" placeholder="répétitions">
       </div>
       <div class="est" id="rmRes" style="margin-top:8px">Fiable jusqu'à environ 10 répétitions.</div>
     </div>
@@ -207,13 +215,13 @@ small a{color:var(--acc)}
   <!-- RÉGLAGES -->
   <section id="v-regl" class="hide">
     <div class="card">
-      <label>Ton poids (kg) — sert seulement aux estimations</label>
+      <label for="rPoids">Ton poids (kg) — sert seulement aux estimations</label>
       <input id="rPoids" type="number" inputmode="decimal" value="75">
-      <label>Tranche d'âge</label>
+      <label for="rAge">Tranche d'âge</label>
       <select id="rAge"><option value="3.5">18 à 59 ans</option><option value="2.7">60 ans et plus</option></select>
-      <label>Objectif d'eau (verres)</label>
+      <label for="rEau">Objectif d'eau (verres)</label>
       <input id="rEau" type="number" inputmode="numeric" value="8">
-      <label style="display:flex;gap:8px;align-items:center;margin-top:14px;color:var(--ink)"><input id="rCache" type="checkbox" style="width:auto"> Cacher tous les chiffres de calories</label>
+      <label for="rCache" style="display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ink);font-size:15px;min-height:44px"><input id="rCache" type="checkbox" style="width:auto"> Cacher tous les chiffres de calories</label>
     </div>
     <div class="card">
       <div class="lbl">Tes données</div>
@@ -231,15 +239,15 @@ small a{color:var(--acc)}
   </section>
 </main>
 
-<nav>
-  <button data-v="jour" class="on">Jour</button>
+<nav aria-label="Sections">
+  <button data-v="jour" class="on" aria-current="page">Jour</button>
   <button data-v="manger">Manger</button>
   <button data-v="recettes">Recettes</button>
   <button data-v="seance">Sport</button>
   <button data-v="histo">Historique</button>
   <button data-v="regl">Réglages</button>
 </nav>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="ciqual.js"></script>
 <script src="recettes.js"></script>
@@ -264,11 +272,11 @@ small a{color:var(--acc)}
     $('eauBar').style.width=Math.min(100,j.eau/r.eau*100)+'%';
     var tot=0;
     $('listeRepas').innerHTML=j.repas.map(function(x,i){if(x.kcal)tot+=x.kcal;
-      return '<li><span>'+esc(x.nom)+(x.kcal&&!r.cache?' · <span class="est">'+x.kcal+' kcal</span>':'')+'</span><button data-delr="'+i+'">✕</button></li>'}).join('');
+      return '<li><span>'+esc(x.nom)+(x.kcal&&!r.cache?' · <span class="est">'+x.kcal+' kcal</span>':'')+'</span><button data-delr="'+i+'" aria-label="Supprimer '+esc(x.nom)+'">✕</button></li>'}).join('');
     $('totKcal').textContent=(tot&&!r.cache)?'Total noté : '+tot+' kcal (ce que tu as saisi)':'';
     $('favoris').innerHTML=db.favoris.slice(0,6).map(function(f,i){return '<button data-fav="'+i+'">'+esc(f.nom)+'</button>'}).join('');
     $('listeSeances').innerHTML=j.seances.length?j.seances.map(function(s,i){
-      return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
+      return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'" aria-label="Supprimer cette séance">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=r.cache?'none':''});
     calcSeance();histo();
     $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=r.eau;$('rCache').checked=r.cache;
@@ -296,7 +304,7 @@ small a{color:var(--acc)}
     if(d.fav!==undefined){var f=db.favoris[+d.fav];jour().repas.push({nom:f.nom,kcal:f.kcal,t:Date.now()});save();rendre();toast(f.nom+' noté')}
     if(d.delr!==undefined){jour().repas.splice(+d.delr,1);save();rendre()}
     if(d.dels!==undefined){jour().seances.splice(+d.dels,1);save();rendre()}
-    if(d.v){if(t.tagName==='A')e.preventDefault();document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===d.v)});
+    if(d.v){if(t.tagName==='A')e.preventDefault();document.querySelectorAll('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===d.v);if(b.dataset.v===d.v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
       ['jour','manger','recettes','seance','histo','regl'].forEach(function(v){$('v-'+v).classList.toggle('hide',v!==d.v)});window.scrollTo(0,0)}
   });
   $('sType').onchange=calcSeance;$('sDuree').oninput=calcSeance;
@@ -462,7 +470,7 @@ small a{color:var(--acc)}
     if(toutes&&e.poids&&best.kg)txt+=' 👍 Tu as dépassé l\'objectif : essaie '+(Math.round(best.kg*1.05*2)/2)+' kg (environ +5 %).';
     else if(toutes)txt+=' 👍 Objectif dépassé : ajoute 2 répétitions'+(e.unite?' (ou 10 s)':'')+'.';
     return txt}
-  function rendreProg(){document.querySelectorAll('[data-prog]').forEach(function(b){b.style.fontWeight=b.dataset.prog===prog?'700':'400'});
+  function rendreProg(){document.querySelectorAll('[data-prog]').forEach(function(b){b.style.fontWeight=b.dataset.prog===prog?'700':'400';b.setAttribute('aria-pressed',b.dataset.prog===prog)});
     var j=jourS();$('progListe').innerHTML=PROG[prog].map(function(k){var n=j.series.filter(function(x){return x.exo===k}).length,e=EXOS[k];
       return '<li><span>'+esc(e.nom)+' <span class="est">· '+e.obj+'</span></span><button data-exo="'+k+'">'+(n?n+'/'+e.series+' ✓':'Ouvrir')+'</button></li>'}).join('');
     var nb=Object.keys(db().jours).filter(function(k){return(db().jours[k].series||[]).length}).length;
@@ -471,7 +479,7 @@ small a{color:var(--acc)}
     $('exoFiche').innerHTML=e.fiche.map(function(p){return '<p style="margin:4px 0">'+p+'</p>'}).join('');
     $('seKg').style.display=e.poids?'':'none';$('seRep').placeholder=e.unite?'secondes':'répétitions';rendreSeries();$('exoCard').scrollIntoView({behavior:'smooth',block:'start'})}
   function rendreSeries(){if(!cur)return;var e=EXOS[cur],s=jourS().series.map(function(x,i){x._i=i;return x}).filter(function(x){return x.exo===cur});
-    $('seListe').innerHTML=s.map(function(x,n){return '<li><span>Série '+(n+1)+' : '+(x.kg?x.kg+' kg × ':'')+x.rep+(e.unite||' rép.')+'</span><button data-dels2="'+x._i+'">✕</button></li>'}).join('');
+    $('seListe').innerHTML=s.map(function(x,n){return '<li><span>Série '+(n+1)+' : '+(x.kg?x.kg+' kg × ':'')+x.rep+(e.unite||' rép.')+'</span><button data-dels2="'+x._i+'" aria-label="Supprimer la série '+(n+1)+'">✕</button></li>'}).join('');
     $('seDernier').textContent=conseil(cur);
     if(!$('seKg').value&&s.length&&s[s.length-1].kg)$('seKg').value=s[s.length-1].kg}
   $('seAj').onclick=function(){if(!cur)return;var e=EXOS[cur],kg=parseFloat($('seKg').value)||0,r=parseInt($('seRep').value,10)||0;if(!r)return;
@@ -510,23 +518,23 @@ small a{color:var(--acc)}
   /* calories et protéines pour UNE portion */
   function valeurs(r){var k=0,p=0,ok=true;r.ing.forEach(function(x){var a=C[x[1]];if(!a||a[1]==null){ok=false;return}k+=a[1]*x[2]/100;p+=(a[2]||0)*x[2]/100});
     return{k:Math.round(k/r.portions),p:Math.round(p/r.portions),ok:ok}}
-  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'};
+  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin'};
   function liste(){var h=R.filter(function(r){return !filtre||r.tags.indexOf(filtre)>=0}).map(function(r){var v=valeurs(r);
-      return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+r.tags.map(function(t){return ICO[t]||''}).join(' ')+'</span></span>'+
-        (cache()?'':'<span class="est" style="text-align:right;white-space:nowrap">≈ '+v.k+' kcal<br>'+v.p+' g prot.</span>')+'</button>'}).join('');
+      return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+r.tags.map(function(t){return '<span aria-hidden="true">'+(ICO[t]||'')+'</span><span class="sr">'+(TXT[t]||t)+', </span>'}).join(' ')+'</span></span>'+
+        (cache()?'':'<span class="est" style="text-align:right;white-space:nowrap">≈ '+v.k+' kcal<span class="sr"> par portion,</span><br>'+v.p+' g prot.</span>')+'</button>'}).join('');
     $('rListe').innerHTML=h||'<div class="card est">Aucune recette pour ce filtre.</div>';
-    document.querySelectorAll('[data-rf]').forEach(function(b){b.classList.toggle('on',b.dataset.rf===filtre)})}
+    document.querySelectorAll('[data-rf]').forEach(function(b){b.classList.toggle('on',b.dataset.rf===filtre);b.setAttribute('aria-pressed',b.dataset.rf===filtre)})}
   function fmt(g){return g>=1000?(Math.round(g/100)/10).toString().replace('.',',')+' kg':Math.round(g)+' g'}
   function fiche(){if(!cur)return;var r=cur,v=valeurs(r),f=nbp/r.portions;
     $('rNom').textContent=r.nom;$('rInfos').textContent=r.min+' min · ingrédients pour '+nbp+' portion'+(nbp>1?'s':'');
     $('rKcal').textContent=cache()?'':'≈ '+v.k+' kcal';$('rKcalDet').textContent=cache()?'':'par portion ('+Math.round(v.k*.85)+'-'+Math.round(v.k*1.15)+') · '+v.p+' g de protéines';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=cache()?'none':''});
-    document.querySelectorAll('[data-rp]').forEach(function(b){b.classList.toggle('on',+b.dataset.rp===nbp)});
+    document.querySelectorAll('[data-rp]').forEach(function(b){b.classList.toggle('on',+b.dataset.rp===nbp);b.setAttribute('aria-pressed',+b.dataset.rp===nbp)});
     $('rIng').innerHTML=r.ing.map(function(x){return '<li><span>'+esc(x[0])+'</span><span class="est">'+fmt(x[2]*f)+'</span></li>'}).join('');
     $('rEtapes').innerHTML=r.etapes.map(function(e){return '<li>'+esc(e)+'</li>'}).join('')}
   function ouvrir(id){cur=R.filter(function(r){return r.id===id})[0];if(!cur)return;nbp=cur.portions;
-    $('rListeBloc').classList.add('hide');$('rFiche').classList.remove('hide');fiche();window.scrollTo(0,0)}
-  function fermer(){cur=null;$('rFiche').classList.add('hide');$('rListeBloc').classList.remove('hide');liste()}
+    $('rListeBloc').classList.add('hide');$('rFiche').classList.remove('hide');fiche();window.scrollTo(0,0);$('rNom').setAttribute('tabindex','-1');$('rNom').focus({preventScroll:true})}
+  function fermer(){var id=cur&&cur.id;cur=null;$('rFiche').classList.add('hide');$('rListeBloc').classList.remove('hide');liste();var b=id&&document.querySelector('[data-rid="'+id+'"]');if(b)b.focus()}
   document.addEventListener('click',function(ev){var t=ev.target.closest?ev.target.closest('[data-rid],[data-rf],[data-rp],[data-v]'):ev.target;if(!t)return;var d=t.dataset;
     if(d.rid)ouvrir(d.rid);
     if(d.rf!==undefined){filtre=d.rf;liste()}
