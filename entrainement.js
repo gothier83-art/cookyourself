@@ -146,7 +146,9 @@
   var ac=null,fin=0,total=0,lbl='',iv=null,dernierBip=-1,wl=null;
   function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
   function bip(f,ms){try{audio();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=0.2;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
-  function eveil(on){try{if(on&&navigator.wakeLock&&!wl)navigator.wakeLock.request('screen').then(function(x){wl=x;x.addEventListener('release',function(){wl=null})}).catch(function(){});if(!on&&wl){wl.release();wl=null}}catch(e){}}
+  /* un seul verrou d'écran à la fois (la demande est asynchrone) ; relâché à la fin de la séance */
+  var wlDemande=false,finSeanceAuto=null;
+  function eveil(on){try{if(on&&navigator.wakeLock&&!wl&&!wlDemande){wlDemande=true;navigator.wakeLock.request('screen').then(function(x){wlDemande=false;if(!seance&&!iv){x.release();return}wl=x;x.addEventListener('release',function(){wl=null})}).catch(function(){wlDemande=false})}if(!on&&wl){wl.release();wl=null}}catch(e){}}
   function lancer(sec,texte){audio();try{if('Notification' in window&&Notification.permission==='default'&&!store('cy.notifDemande')){store('cy.notifDemande','1');Notification.requestPermission()}}catch(e){}fin=Date.now()+sec*1000;total=sec;lbl=texte;dernierBip=-1;$('chrono').classList.remove('hide');document.body.classList.add('avecChrono');$('chLbl').textContent=texte;eveil(true);clearInterval(iv);iv=setInterval(tick,250);tick()}
   function arreter(){clearInterval(iv);iv=null;fin=0;$('chrono').classList.add('hide');$('chrono').classList.remove('fin10');document.body.classList.remove('avecChrono');if(!seance)eveil(false)}
   function tick(){var r=Math.max(0,Math.ceil((fin-Date.now())/1000));$('chT').textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');$('chBar').style.width=(total?(1-r/total)*100:0)+'%';var rg=$('chRing');if(rg)rg.setAttribute('stroke-dashoffset',String(total?Math.min(100,(1-r/total)*100):0));$('chrono').classList.toggle('fin10',r<=10&&r>0);
@@ -170,6 +172,8 @@
     z.querySelectorAll('[data-rpe]').forEach(function(b){b.onclick=function(){der.rpe=+b.dataset.rpe;U.save();rpe(k)}})}
   function fmtSerie(x){return x?(x.kg?String(x.kg).replace('.',',')+' kg × ':'')+x.rep+(S.exo(x.exo)&&S.exo(x.exo).unite?' s':''):''}
   S.surSerie(function(k){var c=cfg(),n=nbFaites(k),L=(U.jour().series||[]).filter(function(x){return x.exo===k});suite();seance=true;eveil(true);
+    /* sans nouvelle série pendant 30 min, la séance est considérée finie : l'écran peut s'éteindre */
+    clearTimeout(finSeanceAuto);finSeanceAuto=setTimeout(function(){seance=false;if(!iv)eveil(false)},30*60000);
     if(n<c.series){lancer(reposApres(n),'Repos · série '+(n+1)+'/'+c.series);$('chNext').innerHTML='Prochaine : <b>'+fmtSerie(L[L.length-1])+'</b>'}
     else{var p=prochain();if(p){lancer(reposApres(Math.max(1,c.series-1)),'Repos · exercice suivant');$('chNext').innerHTML='Ensuite : <b>'+esc(S.exo(p).nom.split(' (')[0])+'</b>'}toast('Exercice terminé ✓',2400)}
     rpe(k)});
@@ -178,7 +182,7 @@
     for(var i=0;i<ks.length;i++){if(ks[i]===auj)continue;var L=(J[ks[i]].series||[]).filter(function(x){return x.exo===k&&x.kg>0});if(!L.length)continue;
       var best=Math.max.apply(0,L.map(function(x){return x.kg})),top=L.filter(function(x){return x.kg===best}),tout=top.length>=Math.min(cfg().series,3)&&top.every(function(x){return x.rep>=e.reps}),fond=top.filter(function(x){return x.rpe===3}).length>top.length/2;
       if(tout&&!fond)return{kg:best+(e.base?2.5:1),pq:'toutes tes séries réussies la dernière fois'};if(fond)return{kg:best,pq:'dernière séance à fond : on consolide'};return{kg:best,pq:'même charge, vise une répétition de plus'}}return null}
-  S.surOuvrir(function(k){var l=$('cfgLigne'),c=conseillee(k);if(!l||!c)return;var b=document.createElement('button');b.className='conseille';b.type='button';b.innerHTML='Conseillé : '+String(c.kg).replace('.',',')+' kg';b.title=c.pq;b.setAttribute('aria-label','Charge conseillée : '+String(c.kg).replace('.',',')+' kilos, '+c.pq+'. Toucher pour la mettre.');b.onclick=function(){$('seKg').value=c.kg;toast(c.pq)};l.appendChild(document.createElement('br'));l.appendChild(b)});
+  S.surOuvrir(function(k){var l=$('cfgLigne'),c=conseillee(k),z=$('cfgConseil');if(!l)return;if(!z){z=document.createElement('div');z.id='cfgConseil';l.parentNode.insertBefore(z,l.nextSibling)}z.innerHTML='';if(!c)return;l=z;var b=document.createElement('button');b.className='conseille';b.type='button';b.innerHTML='Conseillé : '+String(c.kg).replace('.',',')+' kg';b.title=c.pq;b.setAttribute('aria-label','Charge conseillée : '+String(c.kg).replace('.',',')+' kilos, '+c.pq+'. Toucher pour la mettre.');b.onclick=function(){$('seKg').value=c.kg;toast(c.pq)};l.appendChild(b)});
   /* débloque le son sur iPhone au premier appui */
   document.addEventListener('touchend',function u(){audio();document.removeEventListener('touchend',u)},{once:true});
 
