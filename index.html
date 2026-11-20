@@ -1097,7 +1097,8 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
   document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-ouvre]');if(!b)return;document.querySelector('nav [data-v="recettes"]').click();setTimeout(function(){var r=document.querySelector('#rListe [data-rid="'+b.dataset.ouvre+'"]');if(r)r.click()},50)});
   /* premier lancement */
   var D=U.db();if(/(^|[#&])type=signup(&|$)/.test(location.hash)&&D.onb){/* déjà accueilli : compte.js ouvre Réglages > connexion */}
-  if(!D.onb&&!Object.keys(D.jours).some(function(k){var x=D.jours[k];return (x.repas||[]).length||(x.seances||[]).length||(x.series||[]).length||x.ml||x.eau})){
+  /* Premier lancement : tant que ce compte ne l'a pas fait (onb vide). Le compte étant obligatoire, il démarre juste après la connexion. */
+  if(!D.onb){
     var o=document.createElement('div');o.className='onb';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','onbT');document.body.appendChild(o);var etape=0,rep={};
     /* Premier lancement « Atelier » (2026-11, retour : « très à l'ancienne, je remplis des cases ») : une question par écran, plein écran,
        aucun champ à remplir sauf le prénom, passage automatique au choix, transitions glissées (coupées si « réduire les animations »).
