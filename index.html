@@ -135,39 +135,43 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
 .sheet .lien{min-height:0}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="atelier.css">
 </head>
 <body>
 <main>
   <div class="entete">
-    <div><div class="date" id="hDate"></div><h1 id="hTitre">Salut !</h1></div>
+    <div style="display:flex;align-items:center"><div class="date" id="hDate"></div><span class="pastille-serie hide" id="hSerie" role="img"></span><h1 id="hTitre">Salut !</h1></div>
     <div style="display:flex;gap:8px;align-items:center"><button class="lien" id="hCompte" style="min-height:44px;padding:0 4px">Compte</button>
     <button class="iconbtn" data-v="regl" aria-label="Réglages"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="pointer-events:none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 4.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></button></div>
   </div>
 
   <!-- AUJOURD'HUI -->
   <section id="v-jour">
-    <div class="card" style="display:flex;align-items:center;gap:14px;padding:14px 18px">
+    <div class="card" hidden style="gap:14px;padding:14px 18px">
       <div style="font-size:30px" aria-hidden="true">🔥</div>
       <div><div class="titre" style="font-size:21px;color:var(--flamme)" id="jSerie">Lance ta série aujourd'hui</div><div class="est" id="jSerieTxt">Fais ta séance ou le défi du jour.</div></div>
     </div>
-    <div class="card" id="jSommeil"></div>
-    <div class="card">
-      <div class="anneaux">
-        <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aEauSvg" aria-label="Eau"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--water2)" stroke-width="9"/><circle id="aEau" cx="38" cy="38" r="31" fill="none" stroke="var(--water)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b><span id="eau">0</span>/<span id="eauObj">2</span> L</b><span class="est">Eau</span></div>
-        <div class="anneau-btn" id="aSommeilBtn" role="button" tabindex="0" aria-label="Sommeil : modifier"><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aSommeilSvg" aria-label="Sommeil"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--sleep2)" stroke-width="9"/><circle id="aSommeil" cx="38" cy="38" r="31" fill="none" stroke="var(--sleep)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aSommeilTxt">—</b><span class="est">Sommeil</span></div>
-        <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aRepasSvg" aria-label="Repas"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--acc2)" stroke-width="9"/><circle id="aRepas" cx="38" cy="38" r="31" fill="none" stroke="var(--acc)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aRepasTxt">0 repas</b><span class="est">Manger</span></div>
-        <div><svg width="76" height="76" viewBox="0 0 76 76" role="img" id="aBougerSvg" aria-label="Bouger"><circle cx="38" cy="38" r="31" fill="none" stroke="var(--fresh2)" stroke-width="9"/><circle id="aBouger" cx="38" cy="38" r="31" fill="none" stroke="var(--fresh)" stroke-width="9" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 38 38)"/></svg><b id="aBougerTxt">À faire</b><span class="est">Bouger</span></div>
+    <div class="card jour-anneaux">
+      <button class="anneau-tap" id="aEauBtn" aria-label="Ajouter un verre d'eau (25 cl)">
+        <svg width="112" height="112" viewBox="0 0 112 112" role="img" id="aEauSvg" aria-label="Eau">
+          <circle cx="56" cy="56" r="48" fill="none" stroke="var(--water)" stroke-opacity=".15" stroke-width="12"/><circle id="aEau" cx="56" cy="56" r="48" fill="none" stroke="var(--water)" stroke-width="12" stroke-linecap="round" pathLength="194.8" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 56 56)"/>
+          <g id="aRepasSvg" aria-label="Repas"><circle cx="56" cy="56" r="34" fill="none" stroke="var(--fresh)" stroke-opacity=".15" stroke-width="12"/><circle id="aRepas" cx="56" cy="56" r="34" fill="none" stroke="var(--fresh)" stroke-width="12" stroke-linecap="round" pathLength="194.8" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 56 56)"/></g>
+          <g id="aBougerSvg" aria-label="Bouger"><circle cx="56" cy="56" r="20" fill="none" stroke="var(--acc)" stroke-opacity=".15" stroke-width="12"/><circle id="aBouger" cx="56" cy="56" r="20" fill="none" stroke="var(--acc)" stroke-width="12" stroke-linecap="round" pathLength="194.8" stroke-dasharray="194.8" stroke-dashoffset="194.8" transform="rotate(-90 56 56)"/></g>
+        </svg>
+      </button>
+      <div class="leg">
+        <div class="l"><i style="background:var(--water)"></i><div><b><span id="eau">0</span></b><small> / <span id="eauObj">2</span> L</small><span class="n">Eau · touche pour +25 cl</span></div></div>
+        <div class="l"><i style="background:var(--fresh)"></i><div><b id="aRepasTxt">0 repas</b><span class="n" id="jProt">Manger</span></div></div>
+        <div class="l"><i style="background:var(--acc)"></i><div><b id="aBougerTxt">À faire</b><span class="n">Bouger</span></div></div>
       </div>
       <div class="bar hide" aria-hidden="true"><i id="eauBar"></i></div>
-      <div id="jMacros" class="macros"></div>
     </div>
+    <div class="puces"><button class="puce" id="aSommeilBtn" aria-label="Sommeil : noter ma nuit">🌙 <span id="aSommeilTxt">Noter ma nuit</span></button><button class="puce hide" id="jForme"></button></div>
+    <div class="card" id="jSommeil"></div>
+    <div id="jMacros" class="macros hide"></div>
     <div class="card hero" id="jAFaire"></div>
-    <div class="eau3" role="group" aria-label="Ajouter de l'eau" style="margin:0 0 6px">
-      <button data-ml="250">+ Verre<br>25 cl</button>
-      <button data-ml="500">+ Bouteille<br>50 cl</button>
-      <form id="eauForm"><input id="eauLibre" aria-label="Autre quantité d'eau en centilitres" type="number" inputmode="numeric" placeholder="cl"><button id="plusEau" type="submit" aria-label="Ajouter cette quantité d'eau">+</button></form>
-    </div>
-    <div style="text-align:right;margin:0 0 10px"><button class="lien" id="moinsEau">Annuler la dernière boisson</button></div>
+    <div class="rapides" role="group" aria-label="Ajouts rapides"><button class="eau" data-ml="250">+25 cl</button><button class="eau" data-ml="500">+50 cl</button><button data-v="manger">+ Repas</button><button id="jPoidsGo">+ Poids</button></div>
+    <details class="autre"><summary>Autre quantité d'eau · annuler</summary><div class="ligne"><form id="eauForm"><input id="eauLibre" aria-label="Autre quantité d'eau en centilitres" type="number" inputmode="numeric" placeholder="cl"><button id="plusEau" type="submit" aria-label="Ajouter cette quantité d'eau" style="flex:0 0 auto">+</button></form><button class="lien" id="moinsEau">Annuler la dernière</button></div></details>
     <div class="card hide" id="jProfil"></div>
     <div class="card hide" id="jCompte"></div>
     <div class="card hide" id="jCoach"></div>
@@ -481,7 +485,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
   <button data-v="histo"><span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="pointer-events:none"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Progrès</button>
 </nav>
 <div class="chrono hide" id="chrono" role="timer" aria-label="Chrono de repos">
-  <div class="lbl" id="chLbl">Repos</div><div class="chT" id="chT">0:00</div>
+  <div class="lbl" id="chLbl">Repos</div><div class="chRond"><svg width="176" height="176" viewBox="0 0 176 176" aria-hidden="true"><circle cx="88" cy="88" r="80" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="8"/><circle id="chRing" cx="88" cy="88" r="80" fill="none" stroke="#FF6B3D" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0" transform="rotate(-90 88 88)"/></svg><div class="chT" id="chT">0:00</div></div><div id="chNext"></div><div class="rpe" id="chRpe" role="group" aria-label="Ressenti de la série"></div>
   <div class="chB"><button id="chMoins" aria-label="Retirer 15 secondes">−15 s</button><button id="chPlus" aria-label="Ajouter 15 secondes">+15 s</button><button id="chPasser">Passer</button></div>
   <div class="bar" aria-hidden="true"><i id="chBar" style="width:0"></i></div>
 </div>
@@ -898,7 +902,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
   $('eAjout').onclick=function(){var h=$('eHeure').value,r=D().rappels;if(h&&r.heures.indexOf(h)<0){r.heures.push(h);U.save();toast('Rappel à '+h)}};
   $('eListe').onclick=function(e){var b=e.target.closest('[data-eh]');if(!b)return;var r=D().rappels;r.heures=r.heures.filter(function(h){return h!==b.dataset.eh});U.save()};
   var vu={};setInterval(function(){var r=D().rappels;if(!r.on)return;var n=new Date(),h=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'),k=U.cle()+h;
-    if(r.heures.indexOf(h)<0||vu[k])return;vu[k]=1;var t='💧 C\'est l\'heure de boire un verre d\'eau';
+    if(r.heures.indexOf(h)<0||vu[k])return;if(r.malin&&window.CYenRetard&&!window.CYenRetard())return;vu[k]=1;var t='💧 C\'est l\'heure de boire un verre d\'eau';
     try{if('Notification' in window&&Notification.permission==='granted'){navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:t,icon:'icon-192.png'})}).catch(function(){new Notification('CookYourself',{body:t})}):new Notification('CookYourself',{body:t})}}catch(e){}
     toast(t);if(navigator.vibrate)navigator.vibrate([80,60,80])},20000);
   window.CYsuivi();
@@ -1075,7 +1079,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
         $('jCompteOui').onclick=function(){d.carteCompte=1;U.save();var nr=document.querySelector('[data-v="regl"]');if(nr)nr.click();var b=document.getElementById('cVueIns');if(b)b.click()};
         $('jCompteNon').onclick=function(){d.carteCompte=1;U.save()}}else jc.classList.add('hide')}
     if($('jGo'))$('jGo').onclick=function(){document.querySelector('nav [data-v="seance"]').click();setTimeout(function(){var b=document.querySelector('#progListe [data-exo]');if(b)b.click()},50)};
-    if($('jBoire'))$('jBoire').onclick=function(){var b=document.querySelector('.eau3 [data-ml="250"]');if(b)b.click()};
+    if($('jBoire'))$('jBoire').onclick=function(){var b=document.querySelector('.rapides [data-ml="250"]');if(b)b.click()};
     /* idée recette */
     var r=seanceFaite?(function(){var P=(window.RECETTES||[]).filter(function(x){return x.tags.indexOf('rassasiant')>=0});return P.length?P[Math.floor(Date.now()/864e5)%P.length]:idee()})():idee();if(r){$('jIdee').innerHTML='<button data-ouvre="'+esc(r.id)+'" style="display:flex;align-items:center;gap:12px;width:100%;background:none;color:inherit;text-align:left;padding:0;font-weight:400"><span style="width:56px;height:56px;border-radius:14px;background:var(--acc2);display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto" aria-hidden="true">🍲</span><span style="flex:1"><span class="est" style="display:block">'+(seanceFaite?'Recharge après ta séance 💪':h<10?'Idée pour ce matin':h<15?'Idée pour ce midi':'Idée pour ce soir')+'</span><b style="display:block">'+esc(r.nom)+'</b><span class="est">'+r.min+' min</span></span><span aria-hidden="true" style="color:var(--acc);font-size:22px">›</span></button>'}
     /* carte séance (Bouger) */
@@ -1210,6 +1214,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
 </script>
 <script src="entrainement.js"></script>
 <script src="bilan.js"></script>
+<script src="atelier.js"></script>
 <script>
 /* Mode hors ligne : seulement quand l'appli est hébergée en https (pas dans l'aperçu Claude ni en fichier local). */
 try{ if(location.protocol==='https:' && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){}) }catch(e){}

@@ -11,5 +11,5 @@ window.CY_CONFIG = {
   /* Empreinte de supabase-js@2.45.4 (jsdelivr) : le navigateur refuse le fichier s'il a été modifié. */
   supabaseSri: 'sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o',
   phase: 'design_partners',
-  version: 'v43'
+  version: 'v44'
 };
