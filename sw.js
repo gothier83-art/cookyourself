@@ -2,7 +2,7 @@
    Les clés de stockage internes gardent le préfixe « ungeste » pour ne pas perdre les données déjà notées.
    À chaque mise à jour : changer CACHE. Les fichiers sont relus sur le serveur (cache: 'reload'),
    jamais dans le cache du navigateur, sinon une ancienne version pourrait rester. */
-const CACHE = 'cookyourself-v42';
+const CACHE = 'cookyourself-v43';
 const FICHIERS = ['./', './index.html', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './ciqual.js', './recettes.js', './recettes-proteines.js', './config.js', './droits.js', './compte.js', './entrainement.js', './bilan.js', './confidentialite', './fonts/fredoka.woff2', './fonts/inter.woff2'];
 self.addEventListener('install', e => e.waitUntil(
   caches.open(CACHE)
