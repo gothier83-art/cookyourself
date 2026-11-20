@@ -127,7 +127,8 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     <div id="rListeBloc">
       <div class="card" style="padding:12px 16px">
         <div class="lbl">Recettes simples et pas chères · calories calculées avec Ciqual</div>
-        <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button></div>
+        <div class="chips" id="rFiltres" role="group" aria-label="Filtrer les recettes"><button data-rf="" class="on" aria-pressed="true">Toutes</button><button data-rf="rapide">⚡ Rapides</button><button data-rf="vege">🌱 Végé</button><button data-rf="proteines">💪 Protéines</button><button data-rf="matin">☀️ Matin</button><button data-rf="batch">🧊 Batch</button></div>
+        <div class="est hide" id="rBatchInfo" style="margin-top:8px">Batch cooking : on cuisine une fois en grande quantité (le week-end par exemple), puis on garde les portions au frigo ou au congélateur pour la semaine.</div>
       </div>
       <div id="rListe"></div>
     </div>
@@ -138,10 +139,11 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
         <div class="est" id="rInfos"></div>
         <div class="num" style="margin-top:10px"><span style="font-size:26px;font-weight:700" id="rKcal"></span> <span class="est" id="rKcalDet"></span></div>
         <div class="lbl" style="margin:8px 0 4px" id="rPortLbl">Nombre de portions</div>
-        <div class="chips" id="rPortions" role="group" aria-labelledby="rPortLbl"><button data-rp="1">1</button><button data-rp="2">2</button><button data-rp="3">3</button><button data-rp="4">4</button><button data-rp="6">6</button></div>
+        <div class="chips" id="rPortions" role="group" aria-labelledby="rPortLbl"><button data-rp="1">1</button><button data-rp="2">2</button><button data-rp="3">3</button><button data-rp="4">4</button><button data-rp="6">6</button><button data-rp="8">8</button><button data-rp="10">10</button></div>
       </div>
       <div class="card"><div class="lbl">Ingrédients</div><ul id="rIng"></ul></div>
       <div class="card"><div class="lbl">Étapes</div><ol class="et" id="rEtapes"></ol></div>
+      <div class="card hide" id="rGardeBloc"><div class="lbl">🧊 Conservation</div><p id="rGarde" style="margin:6px 0 0;font-size:15px"></p></div>
       <div class="card">
         <button class="main" id="rManger">J'en mange une portion</button>
         <div class="est" style="margin-top:8px">Ajoute une portion à tes repas du jour. Calories = estimation à partir des valeurs moyennes Ciqual (ANSES 2025) ; huile et quantités réelles font varier le résultat.</div>
@@ -518,11 +520,11 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
   /* calories et protéines pour UNE portion */
   function valeurs(r){var k=0,p=0,ok=true;r.ing.forEach(function(x){var a=C[x[1]];if(!a||a[1]==null){ok=false;return}k+=a[1]*x[2]/100;p+=(a[2]||0)*x[2]/100});
     return{k:Math.round(k/r.portions),p:Math.round(p/r.portions),ok:ok}}
-  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin'};
+  var ICO={rapide:'⚡',vege:'🌱',proteines:'💪',matin:'☀️'},TXT={rapide:'rapide',vege:'végétarien',proteines:'riche en protéines',matin:'matin',batch:'batch cooking'};ICO.batch='🧊';
   function liste(){var h=R.filter(function(r){return !filtre||r.tags.indexOf(filtre)>=0}).map(function(r){var v=valeurs(r);
-      return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+r.tags.map(function(t){return '<span aria-hidden="true">'+(ICO[t]||'')+'</span><span class="sr">'+(TXT[t]||t)+', </span>'}).join(' ')+'</span></span>'+
+      return '<button class="rc" data-rid="'+r.id+'"><span><b>'+esc(r.nom)+'</b><span class="est">'+r.min+' min · '+(r.portions>2?r.portions+' portions · ':'')+r.tags.map(function(t){return '<span aria-hidden="true">'+(ICO[t]||'')+'</span><span class="sr">'+(TXT[t]||t)+', </span>'}).join(' ')+'</span></span>'+
         (cache()?'':'<span class="est" style="text-align:right;white-space:nowrap">≈ '+v.k+' kcal<span class="sr"> par portion,</span><br>'+v.p+' g prot.</span>')+'</button>'}).join('');
-    $('rListe').innerHTML=h||'<div class="card est">Aucune recette pour ce filtre.</div>';
+    $('rBatchInfo').classList.toggle('hide',filtre!=='batch');$('rListe').innerHTML=h||'<div class="card est">Aucune recette pour ce filtre.</div>';
     document.querySelectorAll('[data-rf]').forEach(function(b){b.classList.toggle('on',b.dataset.rf===filtre);b.setAttribute('aria-pressed',b.dataset.rf===filtre)})}
   function fmt(g){return g>=1000?(Math.round(g/100)/10).toString().replace('.',',')+' kg':Math.round(g)+' g'}
   function fiche(){if(!cur)return;var r=cur,v=valeurs(r),f=nbp/r.portions;
@@ -531,7 +533,8 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     document.querySelectorAll('.num').forEach(function(e){e.style.display=cache()?'none':''});
     document.querySelectorAll('[data-rp]').forEach(function(b){b.classList.toggle('on',+b.dataset.rp===nbp);b.setAttribute('aria-pressed',+b.dataset.rp===nbp)});
     $('rIng').innerHTML=r.ing.map(function(x){return '<li><span>'+esc(x[0])+'</span><span class="est">'+fmt(x[2]*f)+'</span></li>'}).join('');
-    $('rEtapes').innerHTML=r.etapes.map(function(e){return '<li>'+esc(e)+'</li>'}).join('')}
+    $('rEtapes').innerHTML=r.etapes.map(function(e){return '<li>'+esc(e)+'</li>'}).join('');
+    $('rGardeBloc').classList.toggle('hide',!r.garde);$('rGarde').textContent=r.garde||''}
   function ouvrir(id){cur=R.filter(function(r){return r.id===id})[0];if(!cur)return;nbp=cur.portions;
     $('rListeBloc').classList.add('hide');$('rFiche').classList.remove('hide');fiche();window.scrollTo(0,0);$('rNom').setAttribute('tabindex','-1');$('rNom').focus({preventScroll:true})}
   function fermer(){var id=cur&&cur.id;cur=null;$('rFiche').classList.add('hide');$('rListeBloc').classList.remove('hide');liste();var b=id&&document.querySelector('[data-rid="'+id+'"]');if(b)b.focus()}
