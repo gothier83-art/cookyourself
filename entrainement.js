@@ -10,14 +10,16 @@
 
   /* ===== Objectifs ===== */
   var GOAL={
-    poids:{nom:'Perdre du poids',ic:'⚖️',series:3,repos:60,reps:'12 à 15',rN:15,kcal:-500,prot:1.6,plan:'Léger déficit de calories, 3 à 4 séances par semaine et 8 000 pas par jour.'},
-    graisse:{nom:'Perdre de la graisse',ic:'🔥',series:4,repos:120,reps:'6 à 10',rN:10,kcal:-300,prot:2.0,plan:'Petit déficit, beaucoup de protéines et de la musculation pour garder ton muscle.'},
-    masse:{nom:'Prendre de la masse',ic:'💪',series:4,repos:90,reps:'8 à 12',rN:12,kcal:300,prot:1.8,plan:'Léger surplus de calories, 3 à 5 séances, 10 à 20 séries par muscle et par semaine.'},
-    perf:{nom:'Augmenter mes performances',ic:'🚀',series:5,repos:150,reps:'4 à 6',rN:6,kcal:150,prot:1.6,plan:'Charges lourdes, peu de répétitions, longs repos et un sommeil soigné.'},
+    poids:{nom:'Perdre du poids',ic:'⚖️',series:3,repos:60,reps:'12 à 15',rN:15,kcal:-400,prot:1.6,plan:'Léger déficit de calories, 3 à 4 séances par semaine et 8 000 pas par jour.'},
+    graisse:{nom:'Sécher',ic:'🔥',series:4,repos:120,reps:'6 à 10',rN:10,kcal:-300,prot:2.0,plan:'Petit déficit, beaucoup de protéines et de la musculation pour garder ton muscle.'},
+    masse:{nom:'Prendre du muscle',ic:'💪',series:4,repos:90,reps:'8 à 12',rN:12,kcal:300,prot:1.8,plan:'Léger surplus de calories, 3 à 5 séances, 10 à 20 séries par muscle et par semaine.'},
+    perf:{nom:'Augmenter mes performances',ic:'🚀',series:5,repos:150,reps:'4 à 6',rN:6,kcal:0,prot:1.6,plan:'Charges lourdes, peu de répétitions, longs repos et un sommeil soigné.'},
     garder:{nom:'Garder la forme',ic:'🙂',series:3,repos:75,reps:'10 à 12',rN:12,kcal:0,prot:1.2,plan:'Calories équilibrées, 2 à 3 séances par semaine.'}};
-  function but(){var b=String((U.db().profil||{}).but||'');return GOAL[b]?b:({'-400':'poids','300':'masse'}[b]||'garder')}
-  function butChoisi(){return !!GOAL[String((U.db().profil||{}).but||'')]}
-  window.CYobj={GOAL:GOAL,but:but,choisi:butChoisi,choisir:function(k){var d=U.db();if(!d.profil)d.profil={sexe:'',age:'',taille:'',metier:'1.4',but:'0'};d.profil.but=k;var c=d.seanceCfg;if(c){delete c.jour}U.save();appliquer()}};
+  /* Objectif stocké comme dans le reste de l'appli : profil.but = écart de calories ('0' perf, '300' muscle, '-400' perdre, '-300' sécher), onb = clé courte. */
+  var VERS={'0':'perf','300':'masse','-400':'poids','-300':'graisse'},DE={perf:'0',masse:'300',poids:'-400',graisse:'-300'},ONB={perf:'perf',masse:'muscle',poids:'perdre',graisse:'secher'};
+  function but(){var d=U.db(),o={perf:'perf',muscle:'masse',perdre:'poids',secher:'graisse'}[d.onb];return o||VERS[String((d.profil||{}).but)]||'perf'}
+  function butChoisi(){var d=U.db();return ['perf','muscle','perdre','secher'].indexOf(d.onb)>=0||['300','-400','-300'].indexOf(String((d.profil||{}).but))>=0}
+  window.CYobj={GOAL:GOAL,but:but,choisi:butChoisi,choisir:function(k){var d=U.db();if(!d.profil)d.profil={sexe:'',age:'',taille:'',metier:'1.4',but:'0'};d.profil.but=DE[k]||'0';d.onb=ONB[k]||d.onb;var c=d.seanceCfg;if(c){delete c.jour}U.save();appliquer()}};
 
   /* ===== Bibliothèque d'exercices (ajoutés à ceux du programme débutant) ===== */
   function X(k,nom,muscles,poids,fiche,unite){S.ajouter(k,{nom:nom,muscles:muscles,obj:'',reps:10,series:3,poids:poids,fiche:fiche,unite:unite})}
