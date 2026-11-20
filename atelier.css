@@ -119,3 +119,11 @@ body.avecChrono main{padding-bottom:420px}
 .courses li{align-items:center}.courses li label{display:flex;gap:10px;align-items:center;margin:0;color:var(--ink);font-size:15px;flex:1}
 .courses li.fait label{text-decoration:line-through;color:var(--mute)}
 @media (prefers-reduced-motion:reduce){.jour-anneaux circle,.chrono,.record{transition:none;animation:none}}
+
+/* Écran de connexion obligatoire */
+.porte{position:fixed;inset:0;z-index:300;background:var(--bg);overflow:auto;display:flex;justify-content:center;padding:calc(32px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom))}
+.porte-in{width:100%;max-width:440px;text-align:center}
+.porte-in h1{font-size:30px;margin:8px 0 4px;letter-spacing:-.03em}
+.porte-in>.est{font-size:15px;margin:0 auto 18px;max-width:340px}
+.porte .card{text-align:left}
+.porte #cCarte>.lbl{display:none}

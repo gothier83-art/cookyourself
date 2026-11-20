@@ -412,8 +412,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
     <div class="card">
       <label for="rPoids">Ton poids (kg) — sert seulement aux estimations</label>
       <input id="rPoids" type="number" inputmode="decimal" value="75">
-      <label for="rAge">Tranche d'âge</label>
-      <select id="rAge"><option value="3.5">18 à 59 ans</option><option value="2.7">60 ans et plus</option></select>
+      <input id="rAge" type="hidden">
       <label for="rEau">Objectif d'eau (litres par jour)</label>
       <input id="rEau" type="number" inputmode="decimal" step="0.1" value="2">
       <label for="rCache" style="display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--ink);font-size:15px;min-height:44px"><input id="rCache" type="checkbox" style="width:auto"> Cacher tous les chiffres de calories</label>
@@ -437,13 +436,6 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
       <label for="pBut">Mon but</label>
       <select id="pBut"><option value="0">Augmenter mes performances</option><option value="300">Prendre du muscle</option><option value="-400">Perdre du poids</option><option value="-300">Sécher</option></select>
       <small class="est" style="display:block;margin-top:8px">Calcul : formule de Mifflin-St Jeor × niveau d'activité du travail. Les séances de sport s'ajoutent en plus. C'est une estimation, pas un avis médical.</small>
-    </div>
-    <div class="card">
-      <div class="lbl">Inviter des amis</div>
-      <p style="margin:6px 0">Partage CookYourself avec ton code. Bientôt : <b>1 mois de CookYourself+ offert</b> à toi et à ton ami quand l'abonnement sera lancé.</p>
-      <div class="big" style="font-size:24px;letter-spacing:2px" id="pCode">—</div>
-      <div class="row" style="margin-top:8px"><button class="main" id="pPartager">Inviter un ami</button></div>
-      <small class="est" id="pInfo" style="display:block;margin-top:8px">Ton code est tiré au hasard : il ne contient ni ton nom, ni ton e-mail, ni ton téléphone. Rien n'est envoyé sur Internet tant que tu ne partages pas le lien.</small>
     </div>
     <div class="card">
       <div class="lbl">Rappels d'eau</div>
@@ -555,7 +547,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
       return '<li><span>'+esc(s.exo||'Séance')+' · '+s.min+' min'+(r.cache?'':' · <span class="est">'+fmtK(s.kcal)+'</span>')+'</span><button data-dels="'+i+'" aria-label="Supprimer cette séance">✕</button></li>'}).join(''):'<li><span class="est">Aucune séance.</span></li>';
     document.querySelectorAll('.num').forEach(function(e){e.style.display=r.cache?'none':''});
     calcSeance();histo();if(window.CYsuivi)window.CYsuivi();if(window.CYgam)window.CYgam();if(window.CYvivant)window.CYvivant();
-    $('rPoids').value=r.poids;$('rAge').value=String(r.base);$('rEau').value=L(objMl()).replace(',','.');$('rCache').checked=r.cache;
+    $('rPoids').value=r.poids;$('rEau').value=L(objMl()).replace(',','.');$('rCache').checked=r.cache;
   }
   function calcSeance(){
     var met=parseFloat($('sType').value),min=parseFloat($('sDuree').value)||0;
@@ -596,7 +588,8 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
     var v=kg*(1+n/30);$('rmRes').innerHTML='1RM estimée ≈ <b>'+v.toFixed(1)+' kg</b> · 70 % = '+(v*.7).toFixed(1)+' kg · 80 % = '+(v*.8).toFixed(1)+' kg'+(n>10?' · <i>plus de 10 répétitions : estimation moins fiable</i>':'')}
   $('rmKg').oninput=rm;$('rmRep').oninput=rm;
   $('rPoids').onchange=function(){var v=parseFloat(this.value);if(v>25&&v<350){db.reglages.poids=v;save();rendre()}};
-  $('rAge').onchange=function(){db.reglages.base=parseFloat(this.value);save();rendre()};
+  /* l'âge s'écrit dans « Mon profil » ; il règle la base des calories des séances (60 ans et plus : 2,7) */
+  $('pAge').addEventListener('change',function(){var a=parseInt(this.value,10);if(a>=14&&a<=110){db.reglages.base=a>=60?2.7:3.5;save()}});
   $('rEau').onchange=function(){var v=parseFloat(String(this.value).replace(',','.'));if(v>=0.5&&v<=6){db.reglages.eauMl=Math.round(v*1000);save();rendre()}};
   $('rCache').onchange=function(){db.reglages.cache=this.checked;save();rendre()};
   $('exp').onclick=function(){var txt=JSON.stringify(db,null,1);
@@ -1110,14 +1103,15 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
     function fin(){D=U.db();D.onb=rep.but||'passe';
       /* l'objectif règle l'appli : calories visibles pour perdre / sécher, cible ajustée */
       if(rep.but){D.reglages.cache=rep.but==='perf';D.profil=D.profil||{sexe:'',age:'',taille:'',metier:'1.4',but:'0'};D.profil.but={perf:'0',muscle:'300',perdre:'-400',secher:'-300'}[rep.but]||'0'}
+      if(rep.profil){var rp=rep.profil;D.profil=D.profil||{sexe:'',age:'',taille:'',metier:'1.4',but:'0'};if(rp.sexe)D.profil.sexe=rp.sexe;if(rp.age){D.profil.age=String(rp.age);D.reglages.base=rp.age>=60?2.7:3.5}if(rp.taille)D.profil.taille=String(rp.taille);if(rp.poids){D.reglages.poids=rp.poids;var kk=U.cle();D.poidsLog=(D.poidsLog||[]).filter(function(x){return x.d!==kk});D.poidsLog.push({d:kk,kg:rp.poids})}}
       document.querySelector('main').inert=false;document.querySelector('nav').inert=false;
       if(rep.lieu){var lb=document.querySelector('[data-lieu="'+rep.lieu+'"]');if(lb)lb.click()}U.save();
       o.innerHTML='<div style="margin:auto;text-align:center" role="status"><svg width="96" height="96" viewBox="0 0 48 48" aria-hidden="true" style="flex:0 0 auto"><path d="M6 24h36c0 10-8 17-18 17S6 34 6 24z" fill="var(--acc)"/><path class="fume" d="M17 8c-3 4 3 6 0 10M24 6c-3 4 3 6 0 10M31 8c-3 4 3 6 0 10" fill="none" stroke="var(--acc)" stroke-width="2.8" stroke-linecap="round"/></svg><h1 id="onbT" tabindex="-1" style="font-size:28px;margin:10px 0 0">C\'est prêt !</h1><div class="est" style="font-size:16px">Ta première séance t\'attend.'+(rep.but==='perf'?'<br>Les calories sont masquées pour toi : tu peux les afficher dans Réglages.':'')+'</div></div>';
       o.querySelector('h1').focus();
       setTimeout(function(){o.remove();document.querySelector('nav [data-v="jour"]').focus();if(rep.attente){var t=document.getElementById('toast');t.textContent=rep.attente;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},7000)}},rep.but==='perf'?3000:1800)}
     function dessin(){
-      var tete='<div style="display:flex;justify-content:space-between;align-items:center"><div class="points" role="img" aria-label="Étape '+(etape+1)+' sur 2"><i class="on"></i><i class="'+(etape>=1?'on':'')+'"></i></div>'+
-        (etape===0?(window.CY_CONFIG&&window.CY_CONFIG.supabaseUrl?'<span style="display:flex;gap:14px"><button class="lien" id="onbCo" style="color:var(--acc-ink)">Se connecter</button><button class="lien" id="onbIns" style="color:var(--acc-ink)">Créer un compte</button></span>':''):'<button class="lien" id="onbRetour" style="color:var(--acc-ink)">← Retour</button>')+'</div>';
+      var tete='<div style="display:flex;justify-content:space-between;align-items:center"><div class="points" role="img" aria-label="Étape '+(etape+1)+' sur 3"><i class="on"></i><i class="'+(etape>=1?'on':'')+'"></i><i class="'+(etape>=2?'on':'')+'"></i></div>'+
+        (etape===0?'':'<button class="lien" id="onbRetour" style="color:var(--acc-ink)">← Retour</button>')+'</div>';
       if(etape===0){
         o.innerHTML=tete+'<svg width="64" height="64" viewBox="0 0 48 48" aria-hidden="true" style="align-self:center;flex:0 0 auto"><path d="M6 24h36c0 10-8 17-18 17S6 34 6 24z" fill="var(--acc)"/><path class="fume" d="M17 8c-3 4 3 6 0 10M24 6c-3 4 3 6 0 10M31 8c-3 4 3 6 0 10" fill="none" stroke="var(--acc)" stroke-width="2.8" stroke-linecap="round"/></svg>'+
           '<div style="text-align:center"><h1 id="onbT" style="font-size:30px;margin:0">Salut ! Ton objectif ?</h1><div class="est" style="font-size:16px;margin-top:6px">Tu pourras le changer quand tu veux.</div></div>'+
@@ -1133,9 +1127,20 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
         o.innerHTML=tete+'<div style="text-align:center;margin-top:24px"><h1 id="onbT" style="font-size:30px;margin:0">Tu t\'entraînes où ?</h1><div class="est" style="font-size:16px;margin-top:6px">Ta séance s\'adapte à ton matériel.</div></div>'+
           '<div style="display:flex;flex-direction:column;gap:10px" role="group" aria-labelledby="onbT">'+LIEUX2.map(function(x){return '<button class="choix" data-lieu2="'+x[0]+'"><span aria-hidden="true" style="font-size:22px;margin-right:10px">'+x[1]+'</span><b>'+x[2]+'</b> <span class="est">· '+x[3]+'</span></button>'}).join('')+'</div>'+
           '<div style="text-align:center;margin-top:auto"><button class="lien" id="onbPasser" style="color:var(--acc-ink)">Passer</button></div>';
-        o.querySelectorAll('[data-lieu2]').forEach(function(bt){bt.onclick=function(){rep.lieu=bt.dataset.lieu2;fin()}});
-        $('onbRetour').onclick=function(){etape=0;dessin()};$('onbPasser').onclick=fin;
+        o.querySelectorAll('[data-lieu2]').forEach(function(bt){bt.onclick=function(){rep.lieu=bt.dataset.lieu2;etape=2;dessin()}});
+        $('onbRetour').onclick=function(){etape=0;dessin()};$('onbPasser').onclick=function(){etape=2;dessin()};
       }
+      if(etape===2){var pf=rep.profil||{};
+        o.innerHTML=tete+'<div style="text-align:center;margin-top:24px"><h1 id="onbT" style="font-size:30px;margin:0">Et toi ?</h1><div class="est" style="font-size:16px;margin-top:6px">Pour calculer tes calories et tes protéines. Tu pourras tout changer.</div></div>'+
+          '<form id="onbProfil" style="display:flex;flex-direction:column;gap:4px"><div class="lbl">Tu es</div><div class="chips" role="group" aria-label="Sexe" style="margin-top:0">'+[['h','Un homme'],['f','Une femme']].map(function(x){return '<button type="button" data-sx="'+x[0]+'" aria-pressed="'+(pf.sexe===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+          '<div class="row" style="margin-top:6px"><label style="margin:0">Âge<input id="onbAge" type="number" inputmode="numeric" min="14" max="100" placeholder="ex. 28" value="'+(pf.age||'')+'" style="margin-top:4px"></label><label style="margin:0">Taille (cm)<input id="onbTaille" type="number" inputmode="numeric" min="120" max="230" placeholder="ex. 178" value="'+(pf.taille||'')+'" style="margin-top:4px"></label><label style="margin:0">Poids (kg)<input id="onbPoids" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="ex. 75" value="'+(pf.poids||'')+'" style="margin-top:4px"></label></div>'+
+          '<div class="est" id="onbPErr" role="alert" style="color:var(--danger);min-height:20px"></div><button class="main" type="submit">C\'est parti</button></form>'+
+          '<div style="text-align:center;margin-top:auto"><button class="lien" id="onbPasser" style="color:var(--acc-ink)">Plus tard</button></div>';
+        var sx=pf.sexe||'';o.querySelectorAll('[data-sx]').forEach(function(bt){bt.onclick=function(){sx=bt.dataset.sx;o.querySelectorAll('[data-sx]').forEach(function(z){z.setAttribute('aria-pressed',z===bt)})}});
+        $('onbRetour').onclick=function(){etape=1;dessin()};$('onbPasser').onclick=fin;
+        $('onbProfil').onsubmit=function(ev){ev.preventDefault();var a=parseInt($('onbAge').value,10),t=parseInt($('onbTaille').value,10),kg=parseFloat(String($('onbPoids').value).replace(',','.')),err='';
+          if($('onbAge').value&&!(a>=14&&a<=100))err='Âge : entre 14 et 100 ans.';else if($('onbTaille').value&&!(t>=120&&t<=230))err='Taille : entre 120 et 230 cm.';else if($('onbPoids').value&&!(kg>=30&&kg<=300))err='Poids : entre 30 et 300 kg.';
+          if(err){$('onbPErr').textContent=err;return}rep.profil={sexe:sx,age:a||'',taille:t||'',poids:kg||''};fin()}}
       var h=o.querySelector('h1');if(h){h.setAttribute('tabindex','-1');h.focus()}}
     /* Écran 0 : créer son compte (ou se connecter), facultatif. */
     function ecranCompte(mode,msg,err){if(!(window.CY_CONFIG&&window.CY_CONFIG.supabaseUrl)){dessin();return}var co=mode==='co';
@@ -1147,7 +1152,7 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
       (co?'':'<label style="display:flex;gap:12px;align-items:flex-start;min-height:44px;margin-top:10px;color:var(--ink);font-size:15px"><input id="onbAccord" type="checkbox" style="width:24px;height:24px;flex:0 0 24px;margin-top:0;accent-color:var(--acc)"> <span>J\'accepte que mes données (repas, séances, poids) soient gardées sur un serveur en Europe, rien que pour moi. Je peux retirer cet accord en supprimant mon compte. <a href="confidentialite" target="_blank" rel="noopener" style="display:inline-block;min-height:44px;line-height:44px">Confidentialité</a></span></label>')+
       '<div id="onbMsg" role="status" class="est" style="min-height:20px;margin-top:6px;'+(err?'color:var(--danger)':msg?'color:var(--fresh);font-weight:600':'')+'">'+(msg||'')+'</div>'+
       '<button class="main" type="submit">'+(co?'Me connecter':'Créer mon compte')+'</button></form>'+
-      '<div style="text-align:center;display:flex;flex-direction:column;align-items:center">'+(co?'<button class="lien" id="onbOubli">Mot de passe oublié ?</button>':'')+'<button class="lien" id="onbBascule">'+(co?'Pas encore de compte ? En créer un':'J\'ai déjà un compte')+'</button><div class="est" style="margin-top:4px">Sans compte, tout marche aussi, sur ce téléphone.</div></div>';
+      '<div style="text-align:center;display:flex;flex-direction:column;align-items:center">'+(co?'<button class="lien" id="onbOubli">Mot de passe oublié ?</button>':'')+'<button class="lien" id="onbBascule">'+(co?'Pas encore de compte ? En créer un':'J\'ai déjà un compte')+'</button></div>';
       $('onbSans').onclick=function(){dessin()};
       $('onbVoir').onclick=function(){var p=$('onbPass'),v=p.type==='password';p.type=v?'text':'password';this.textContent=v?'Cacher':'Voir';this.setAttribute('aria-pressed',v)};
       ['onbMail','onbPass'].forEach(function(id){$(id).oninput=function(){this.removeAttribute('aria-invalid')}});
@@ -1190,26 +1195,11 @@ body.avecChrono main{padding-bottom:300px}.toast{z-index:70}body.avecChrono .toa
   window.CYvivant();
 })();
 </script>
-<script>
-/* Parrainage anonyme : code aléatoire gardé sur le téléphone. Récompenses activées avec l'abonnement. */
-(function(){
-  var U=window.UnGeste;function $(i){return document.getElementById(i)}
-  var d=U.db(),A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  if(!d.parrain){var c='';try{var b=new Uint8Array(6);crypto.getRandomValues(b);for(var i=0;i<6;i++)c+=A[b[i]%A.length]}catch(e){for(var i=0;i<6;i++)c+=A[Math.floor(Math.random()*A.length)]}d.parrain=c;U.save()}
-  try{var q=new URLSearchParams(location.search).get('p');if(q&&/^[A-Z0-9]{6}$/.test(q)&&q!==d.parrain&&!d.parrainePar){d.parrainePar=q;U.save()}
-    if(q)history.replaceState(null,'',location.pathname)}catch(e){}
-  $('pCode').textContent=d.parrain;
-  var lien='https://cookyourself.fitness/?p='+d.parrain,txt='Je cuisine et je m\'entraîne avec CookYourself : recettes protéinées, suivi de l\'eau, sport. Gratuit et sans pub. Mon code : '+d.parrain;
-  $('pPartager').onclick=function(){if(navigator.share){navigator.share({title:'CookYourself',text:txt,url:lien}).catch(function(){})}
-    else{try{navigator.clipboard.writeText(txt+' '+lien).then(function(){$('pInfo').textContent='Lien copié : colle-le dans un message.'})}catch(e){$('pInfo').textContent=lien}}};
-  if(d.parrainePar)$('pInfo').textContent+=' Tu as été invité avec le code '+d.parrainePar+'.';
-})();
-</script>
 <script src="compte.js"></script>
 <script>
 /* Bouton « Compte » de l'en-tête : ouvre Réglages sur le bloc compte (création proposée si pas connecté). */
-(function(){var b=document.getElementById('hCompte');if(!b)return;function maj(){var c=window.CYcompte;b.hidden=!(c&&c.actif());b.textContent=c&&c.connecte()?'Mon compte':'Créer un compte'}
-  b.onclick=function(){var r=document.querySelector('.iconbtn[data-v="regl"]');if(r)r.click();var c=window.CYcompte;if(c&&!c.connecte()){var i=document.getElementById('cVueIns');if(i)i.click()}var k=document.getElementById('cCarte');if(k)k.scrollIntoView({block:'start'})};
+(function(){var b=document.getElementById('hCompte');if(!b)return;function maj(){var c=window.CYcompte;b.hidden=!(c&&c.actif());b.textContent=c&&c.connecte()?'Mon compte':'Se connecter'}
+  b.onclick=function(){var r=document.querySelector('.iconbtn[data-v="regl"]');if(r)r.click();var c=window.CYcompte;if(c&&!c.connecte()){var i=document.getElementById('cVueCo');if(i)i.click()}var k=document.getElementById('cCarte');if(k)k.scrollIntoView({block:'start'})};
   maj();setInterval(maj,3000)})();
 </script>
 <script src="entrainement.js"></script>
