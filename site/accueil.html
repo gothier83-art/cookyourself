@@ -17,9 +17,6 @@
 <script>
 /* Appli installée sur l'écran d'accueil : on ouvre directement l'appli. */
 try { if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) location.replace('/app/' + location.search); } catch (e) {}
-/* Lien de parrainage (?p=CODE) : on le transmet aux liens vers l'appli. */
-document.addEventListener('DOMContentLoaded', function(){ var p = new URLSearchParams(location.search).get('p'); if (!p || !/^[A-Z0-9]{6}$/.test(p)) return;
-  document.querySelectorAll('a[href^="/app/"]').forEach(function(a){ var u = new URL(a.getAttribute('href'), location.origin); u.searchParams.set('p', p); a.setAttribute('href', u.pathname + u.search); }); });
 </script>
 <style>
 /* Polices hébergées sur le site (pas de Google Fonts). */

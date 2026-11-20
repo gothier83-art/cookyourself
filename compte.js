@@ -89,6 +89,7 @@
   }
 
   /* ---------- Interface ---------- */
+  function joursUtilises(){ var J = (U.db() || {}).jours || {}; return Object.keys(J).filter(function(k){ var j = J[k] || {}; return (j.repas||[]).length || (j.series||[]).length || (j.seances||[]).length || j.ml || j.sommeil; }).length; }
   function dessiner(){
     var z = $('cZone'); if (!z) return;
     var conf = '<a href="confidentialite" target="_blank" rel="noopener">Politique de confidentialité</a>';
@@ -118,7 +119,7 @@
     }
     if (!user) {
       var ins = vue === 'inscription';
-      z.innerHTML = '<p class="est" style="margin:0 0 8px">Facultatif. Il sert seulement à sauvegarder tes données et à les retrouver sur un autre téléphone.</p>' +
+      z.innerHTML = '<p class="est" style="margin:0 0 8px">Ton compte garde tes données en sécurité et te les rend sur tous tes appareils.</p>' +
         '<div class="seg" role="group" aria-label="Choisir"><button type="button" id="cVueCo" aria-pressed="' + !ins + '">J\'ai un compte</button><button type="button" id="cVueIns" aria-pressed="' + ins + '">Créer un compte</button></div>' +
         '<form id="cForm"><label for="cMail">Ton e-mail</label><input id="cMail" type="email" autocomplete="email" inputmode="email" placeholder="toi@exemple.fr">' +
         '<label for="cPass">Mot de passe' + (ins ? ' (8 caractères minimum)' : '') + '</label><div style="display:flex;gap:8px;align-items:center"><input id="cPass" type="password" autocomplete="' + (ins ? 'new-password' : 'current-password') + '" aria-describedby="cEtat" style="flex:1"><button type="button" id="cVoir" aria-label="Afficher le mot de passe" aria-controls="cPass" aria-pressed="false" style="flex:0 0 auto;min-width:44px;min-height:44px">Voir</button></div>' +
@@ -156,7 +157,7 @@
           if (r.error) { etat(/registered|exists/i.test(r.error.message) ? 'Ce compte existe déjà : connecte-toi.' : /rate|limit/i.test(r.error.message) ? 'Trop d\'essais : réessaie dans une heure.' : 'Création impossible pour l\'instant. Réessaie dans quelques minutes.', 1); return; }
           if (r.data && r.data.user && r.data.user.identities && !r.data.user.identities.length) { vue = 'connexion'; dessiner(); etat('Ce compte existe déjà : connecte-toi avec ton mot de passe.', 1); return; }
           if (r.data && r.data.session) return;   /* confirmation désactivée : déjà connecté */
-          vue = 'connexion'; dessiner(); etat('Presque fini ! Ouvre l\'e-mail envoyé à ' + mail + ' et touche le lien de confirmation. Tu seras connecté automatiquement. Pas d\'e-mail ? Regarde dans les spams.');
+          vue = 'connexion'; dessiner(); etat('Presque fini ! Ouvre l\'e-mail envoyé à ' + mail + ' et touche le lien de confirmation, puis reviens ici et connecte-toi. Pas d\'e-mail ? Regarde dans les spams.');
           var z2 = $('cZone'); if (z2) { var b2 = document.createElement('button'); b2.className = 'lien'; b2.textContent = 'Renvoyer l\'e-mail'; b2.onclick = async function(){ occupe(b2, 1, 'Envoi…'); var rr = await sb.auth.resend({ type: 'signup', email: mail }); occupe(b2, 0); etat(rr.error ? 'Renvoi impossible pour l\'instant (limite d\'envoi). Réessaie plus tard.' : 'E-mail renvoyé à ' + mail + '.', !!rr.error); }; z2.appendChild(b2); }
         } else {
           etat('Connexion…'); occupe(btn, 1);
@@ -172,11 +173,11 @@
         '<div class="est" id="cEtat" role="status" style="margin:4px 0 10px">Tes données sont sauvegardées automatiquement.</div><div id="cChoix"></div>' +
         '<div class="row"><button id="cSync">Sauvegarder maintenant</button><button id="cDeco">Se déconnecter</button></div>' +
         '<p class="est">Te déconnecter n\'efface rien sur ce téléphone.</p>' +
-        '<div class="card" style="background:var(--soft);margin:12px 0 0"><b>Ton avis nous aide</b><p class="est" style="margin:4px 0 8px">Tu fais partie des premiers utilisateurs. Dis-nous ce qui marche et ce qui manque.</p>' +
+        (joursUtilises() >= 3 ? '<details class="card" style="background:var(--soft);margin:12px 0 0"><summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600">Donner mon avis</summary>' : '<div hidden>') + '<b hidden>Ton avis nous aide</b><p class="est" style="margin:4px 0 8px">Tu fais partie des premiers utilisateurs. Dis-nous ce qui marche et ce qui manque.</p>' +
         '<form id="cAvisForm"><label for="cNote">Ta note</label><select id="cNote"><option value="5">5 - J\'adore</option><option value="4">4 - Bien</option><option value="3">3 - Moyen</option><option value="2">2 - Bof</option><option value="1">1 - Pas du tout</option></select>' +
         '<label for="cAvis">Ce qui te plaît, ce qui manque, un bug…</label><textarea id="cAvis" rows="3" maxlength="2000" style="width:100%;font:inherit;padding:11px;border:2px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink)"></textarea>' +
         '<label style="display:flex;gap:12px;align-items:center;min-height:44px;color:var(--ink);font-size:15px"><input id="cRecontact" type="checkbox" style="width:24px;height:24px;flex:0 0 24px;accent-color:var(--acc)"> On peut me recontacter par e-mail</label>' +
-        '<button type="submit" style="width:100%">Envoyer mon avis</button></form></div>' +
+        '<button type="submit" style="width:100%">Envoyer mon avis</button></form>' + (joursUtilises() >= 3 ? '</details>' : '</div>') +
         '<div style="margin-top:14px"><button class="lien" id="cSuppr" style="color:var(--danger)">Supprimer mon compte et mes données en ligne</button></div><div id="cSupprZone"></div>' +
         '<div class="est" style="margin-top:6px">' + conf + '</div>';
       $('cSync').onclick = synchro;
@@ -202,13 +203,41 @@
     }
   }
 
+  /* Connexion obligatoire : sans compte, l'appli montre seulement l'écran de connexion.
+     Une session déjà ouverte sur l'appareil suffit, même hors ligne (la salle n'a pas toujours de réseau). */
+  var porte = null;
+  function sessionLocale(){ try { for (var i = 0; i < localStorage.length; i++){ var k = localStorage.key(i); if (/^sb-.*-auth-token$/.test(k) && localStorage.getItem(k)) return true; } } catch(e){} return false; }
+  function bloquer(on){ ['main','nav'].forEach(function(s){ var e = document.querySelector(s); if (e) e.inert = on || !!document.querySelector('.onb'); }); }
+  function ouvrirPorte(msg){
+    if (!actif()) return;
+    if (!porte){
+      var k = $('cCarte'); if (!k) return;
+      porte = document.createElement('div'); porte.className = 'porte'; porte.setAttribute('role', 'dialog'); porte.setAttribute('aria-modal', 'true'); porte.setAttribute('aria-labelledby', 'porteT');
+      porte.innerHTML = '<div class="porte-in"><svg width="64" height="64" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 24h36c0 10-8 17-18 17S6 34 6 24z" fill="var(--acc)"/><path d="M17 8c-3 4 3 6 0 10M24 6c-3 4 3 6 0 10M31 8c-3 4 3 6 0 10" fill="none" stroke="var(--acc)" stroke-width="2.8" stroke-linecap="round"/></svg>' +
+        '<h1 id="porteT">CookYourself</h1><p class="est">Connecte-toi pour noter tes repas, ton eau, ton sommeil et tes séances, et les retrouver sur tous tes appareils.</p><div id="porteZone"></div></div>';
+      document.body.appendChild(porte);
+      k._parent = k.parentNode; k._next = k.nextSibling; $('porteZone').appendChild(k);
+      bloquer(true);
+    }
+    dessiner(); if (msg) etat(msg, 1);
+  }
+  function fermerPorte(){
+    if (!porte) return;
+    var k = $('cCarte'); if (k && k._parent) k._parent.insertBefore(k, k._next && k._next.parentNode === k._parent ? k._next : null);
+    porte.remove(); porte = null; bloquer(false);
+  }
+  /* Après la connexion : si ce compte a déjà fait le premier lancement (sur un autre appareil), on ne le refait pas. On arrive sur l'accueil. */
+  function apresConnexion(){ var d = U.db(), o = document.querySelector('.onb'); if (o && d && d.onb) { o.remove(); bloquer(false); } if (!document.querySelector('.onb')) { var n = document.querySelector('nav [data-v="jour"]'); if (n) n.click(); } }
+  window.CYporte = { ouverte: function(){ return !!porte; } };
+
   async function demarrer(){
     dessiner();
     if (!actif()) { pretOk(false); return; }
+    if (!sessionLocale()) ouvrirPorte();
     if (!window.supabase) {
       await new Promise(function(ok, ko){ var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'; s.crossOrigin = 'anonymous'; if (CFG.supabaseSri) s.integrity = CFG.supabaseSri; s.onload = ok; s.onerror = ko; document.head.appendChild(s); })
         .catch(function(){ etat('Hors ligne : la connexion au compte reviendra avec le réseau.', 1); });
-      if (!window.supabase) { pretOk(false); return; }
+      if (!window.supabase) { pretOk(false); if (!sessionLocale()) ouvrirPorte('Pas de réseau : connecte-toi à Internet pour ouvrir ta session la première fois.'); return; }
     }
     /* Retour depuis un lien d'e-mail (ouvert dans Safari) : on lit l'adresse AVANT de créer le client. */
     var h = new URLSearchParams((location.hash || '').replace(/^#/, '')), typeLien = h.get('type'), erreurLien = h.get('error_description') || h.get('error');
@@ -216,8 +245,9 @@
     if (typeLien === 'recovery') modeReset = true;
     /* NE PAS passer en flowType 'pkce' : le lien ouvert dans Safari n'aurait plus le bon jeton. */
     sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, { auth: { persistSession: true, detectSessionInUrl: true } });
-    sb.auth.onAuthStateChange(function(ev, session){ if (ev === 'SIGNED_OUT') modeReset = false; if (ev === 'PASSWORD_RECOVERY') { modeReset = true; user = session ? session.user : null; var nr = document.querySelector('[data-v="regl"]'); if (nr) nr.click(); dessiner(); return; } var avant = user; user = session ? session.user : null; if (!avant && user) { lirePlan().then(dessiner); dessiner(); synchro(); } else if (avant && !user) dessiner(); });
+    sb.auth.onAuthStateChange(function(ev, session){ if (ev === 'SIGNED_OUT') modeReset = false; if (ev === 'PASSWORD_RECOVERY') { modeReset = true; user = session ? session.user : null; var nr = document.querySelector('[data-v="regl"]'); if (nr) nr.click(); dessiner(); return; } var avant = user; user = session ? session.user : null; if (user) fermerPorte(); if (!avant && user) { lirePlan().then(dessiner); dessiner(); Promise.resolve(synchro()).then(apresConnexion, apresConnexion); } else if (avant && !user) { dessiner(); ouvrirPorte(); } });
     var s = await sb.auth.getSession(); user = s.data.session ? s.data.session.user : null; pretOk(true);
+    if (user) fermerPorte(); else ouvrirPorte();
     if (erreurLien) { history.replaceState(null, '', location.pathname); var nr2 = document.querySelector('[data-v="regl"]'); if (nr2) nr2.click(); dessiner(); etat('Ce lien a expiré ou a déjà servi. Retourne dans l\'appli et redemande un e-mail.', 1); return; }
     if (typeLien === 'signup' || typeLien === 'magiclink') {
       history.replaceState(null, '', location.pathname);

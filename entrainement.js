@@ -66,6 +66,7 @@
   /* objectif de répétitions affiché selon le but */
   /* gros mouvements : là où l'objectif « performances » s'applique (charges lourdes, longs repos) */
   var BASE={squat:1,x_dc:1,souleve:1,militaire:1,rowing:1,tractions:1,x_presse:1,x_tirvert:1,x_dih:1,x_dipsb:1,x_dipsm:1,x_chin:1,goblet:1,souleveh:1,devsol:1,epaulesh:1,rowh:1,x_tirhor:1,x_epm:1,pompes:1};
+  window.CYobj.groupe=function(k){if(/^m_/.test(k)){var m=machines().filter(function(x){return 'm_'+x.id===k})[0];return m?m.groupe:null}var L=LIB.salle,r=null;['salle','maison','calis'].forEach(function(l){Object.keys(LIB[l]).forEach(function(g){if(!r&&LIB[l][g].indexOf(k)>=0)r=g})});return r};
   function cible(k){var e=S.exo(k),b=but(),g=GOAL[b];if(!e)return;e.base=!!BASE[k]||(/^m_/.test(k)&&!!e.poids);
     if(e.unite==='s'){e.obj=g.series+' fois '+(b==='perf'?'30 à 60':'20 à 45')+' secondes';e.reps=b==='perf'?60:45;return}
     if(b==='perf'&&!e.base){e.obj='3 séries de 8 à 12 (exercice d\'appoint)';e.reps=12;return}
@@ -111,7 +112,8 @@
   function cfg(){var d=U.db(),g=GOAL[but()];if(!d.seanceCfg||typeof d.seanceCfg!=='object')d.seanceCfg={};var c=d.seanceCfg;
     c.series=Math.round(+c.series);c.repos=Math.round(+c.repos);c.meme=c.meme!==false;if(!(c.series>=1&&c.series<=12))c.series=g.series;if(!(c.repos>=10&&c.repos<=600))c.repos=g.repos;if(!Array.isArray(c.liste))c.liste=[];c.liste=c.liste.map(function(x){x=Math.round(+x);return x>=10&&x<=600?x:0});return c}
   function reposApres(n){var c=cfg();return c.meme?c.repos:(+c.liste[n-1]||c.repos)}
-  window.CYchrono={series:function(){return cfg().series},arreter:function(){arreter()}};
+  window.CYchrono={series:function(){return cfg().series},arreter:function(){seance=false;arreter()}};
+  var seance=false;
   var sheetOuvert=false,apresSheet=null;
   function sheet(){var c=cfg(),g=GOAL[but()],tmp={series:c.series,meme:c.meme,repos:c.repos,liste:c.liste.slice()},avant=document.activeElement;sheetOuvert=true;
     var o=document.createElement('div');o.className='voile';o.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"></div>';document.body.appendChild(o);var s=o.firstChild;
@@ -144,15 +146,17 @@
   var ac=null,fin=0,total=0,lbl='',iv=null,dernierBip=-1,wl=null;
   function audio(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
   function bip(f,ms){try{audio();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=0.2;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+ms/1000)}catch(e){}}
-  function eveil(on){try{if(on&&navigator.wakeLock&&!wl)navigator.wakeLock.request('screen').then(function(x){wl=x;x.addEventListener('release',function(){wl=null})}).catch(function(){});if(!on&&wl){wl.release();wl=null}}catch(e){}}
+  /* un seul verrou d'écran à la fois (la demande est asynchrone) ; relâché à la fin de la séance */
+  var wlDemande=false,finSeanceAuto=null;
+  function eveil(on){try{if(on&&navigator.wakeLock&&!wl&&!wlDemande){wlDemande=true;navigator.wakeLock.request('screen').then(function(x){wlDemande=false;if(!seance&&!iv){x.release();return}wl=x;x.addEventListener('release',function(){wl=null})}).catch(function(){wlDemande=false})}if(!on&&wl){wl.release();wl=null}}catch(e){}}
   function lancer(sec,texte){audio();try{if('Notification' in window&&Notification.permission==='default'&&!store('cy.notifDemande')){store('cy.notifDemande','1');Notification.requestPermission()}}catch(e){}fin=Date.now()+sec*1000;total=sec;lbl=texte;dernierBip=-1;$('chrono').classList.remove('hide');document.body.classList.add('avecChrono');$('chLbl').textContent=texte;eveil(true);clearInterval(iv);iv=setInterval(tick,250);tick()}
-  function arreter(){clearInterval(iv);iv=null;fin=0;$('chrono').classList.add('hide');document.body.classList.remove('avecChrono');eveil(false)}
-  function tick(){var r=Math.max(0,Math.ceil((fin-Date.now())/1000));$('chT').textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');$('chBar').style.width=(total?(1-r/total)*100:0)+'%';
+  function arreter(){clearInterval(iv);iv=null;fin=0;$('chrono').classList.add('hide');$('chrono').classList.remove('fin10');document.body.classList.remove('avecChrono');if(!seance)eveil(false)}
+  function tick(){var r=Math.max(0,Math.ceil((fin-Date.now())/1000));$('chT').textContent=Math.floor(r/60)+':'+String(r%60).padStart(2,'0');$('chBar').style.width=(total?(1-r/total)*100:0)+'%';var rg=$('chRing');if(rg)rg.setAttribute('stroke-dashoffset',String(total?Math.min(100,(1-r/total)*100):0));$('chrono').classList.toggle('fin10',r<=10&&r>0);
     if(r<=3&&r>0&&r!==dernierBip){dernierBip=r;bip(660,120)}
     if(r<=0){clearInterval(iv);iv=null;bip(990,500);if(navigator.vibrate)navigator.vibrate([200,100,200]);$('chT').textContent='C\'est parti !';$('chBar').style.width='100%';
       if(document.hidden){try{if('Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:'Repos terminé : '+lbl.replace(/^Repos · /,''),icon:'icon-192.png',tag:'repos'})})}catch(e){}}
       toast('Repos terminé : c\'est parti !',2500);setTimeout(function(){if(!iv)arreter()},4000)}}
-  document.addEventListener('visibilitychange',function(){if(!document.hidden&&iv){eveil(true);tick()}});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden&&(iv||seance)){eveil(true);if(iv)tick()}});
   /* série supprimée pendant le repos : on arrête le chrono (le libellé ne serait plus juste) */
   document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-dels2]')){if(iv)arreter();suite()}});
   $('chMoins').onclick=function(){if(iv){fin-=15000;tick()}};$('chPlus').onclick=function(){if(iv){fin+=15000;total+=15;tick()}};$('chPasser').onclick=arreter;
@@ -162,9 +166,23 @@
   function suite(){var z=$('exoSuite');if(!z)return;var k=S.courant(),c=cfg(),n=nbFaites(k);
     if(k&&n>=c.series){var p=prochain();z.innerHTML='<div style="margin-top:10px;padding:12px;border-radius:14px;background:var(--fresh2);color:var(--fresh);font-weight:600">Exercice terminé ✓ '+n+' séries</div>'+(p?'<button class="main" data-exo="'+p+'" style="margin-top:8px">Exercice suivant : '+esc(S.exo(p).nom.split(' (')[0])+'</button>':'<div class="est" style="margin-top:8px">Tous les exercices sont faits. Appuie sur « Terminer la séance » plus bas.</div>')}
     else z.innerHTML=k?'<div class="est" style="margin-top:6px">Série '+Math.min(n+1,c.series)+' sur '+c.series+'</div>':''}
-  S.surSerie(function(k){var c=cfg(),n=nbFaites(k);suite();
-    if(n<c.series)lancer(reposApres(n),'Repos · ensuite : série '+(n+1)+' sur '+c.series);
-    else{var p=prochain();if(p)lancer(reposApres(Math.max(1,c.series-1)),'Repos · ensuite : '+S.exo(p).nom.split(' (')[0]);toast('Exercice terminé ✓',2400)}});
+  /* ressenti de la série (facultatif) : facile, dur, à fond. Sert à la charge conseillée. */
+  function rpe(k){var z=$('chRpe');if(!z)return;var L=(U.jour().series||[]).filter(function(x){return x.exo===k}),der=L[L.length-1];if(!der){z.innerHTML='';return}
+    z.innerHTML=[[1,'Facile'],[2,'Dur'],[3,'À fond']].map(function(r){return '<button data-rpe="'+r[0]+'" aria-pressed="'+(der.rpe===r[0])+'">'+r[1]+'</button>'}).join('');
+    z.querySelectorAll('[data-rpe]').forEach(function(b){b.onclick=function(){der.rpe=+b.dataset.rpe;U.save();rpe(k)}})}
+  function fmtSerie(x){return x?(x.kg?String(x.kg).replace('.',',')+' kg × ':'')+x.rep+(S.exo(x.exo)&&S.exo(x.exo).unite?' s':''):''}
+  S.surSerie(function(k){var c=cfg(),n=nbFaites(k),L=(U.jour().series||[]).filter(function(x){return x.exo===k});suite();seance=true;eveil(true);
+    /* sans nouvelle série pendant 30 min, la séance est considérée finie : l'écran peut s'éteindre */
+    clearTimeout(finSeanceAuto);finSeanceAuto=setTimeout(function(){seance=false;if(!iv)eveil(false)},30*60000);
+    if(n<c.series){lancer(reposApres(n),'Repos · série '+(n+1)+'/'+c.series);$('chNext').innerHTML='Prochaine : <b>'+fmtSerie(L[L.length-1])+'</b>'}
+    else{var p=prochain();if(p){lancer(reposApres(Math.max(1,c.series-1)),'Repos · exercice suivant');$('chNext').innerHTML='Ensuite : <b>'+esc(S.exo(p).nom.split(' (')[0])+'</b>'}toast('Exercice terminé ✓',2400)}
+    rpe(k)});
+  /* charge conseillée : d'après la dernière séance de l'exercice et le ressenti */
+  function conseillee(k){var e=S.exo(k);if(!e||!e.poids)return null;var J=U.db().jours,ks=Object.keys(J).sort().reverse(),auj=U.cle();
+    for(var i=0;i<ks.length;i++){if(ks[i]===auj)continue;var L=(J[ks[i]].series||[]).filter(function(x){return x.exo===k&&x.kg>0});if(!L.length)continue;
+      var best=Math.max.apply(0,L.map(function(x){return x.kg})),top=L.filter(function(x){return x.kg===best}),tout=top.length>=Math.min(cfg().series,3)&&top.every(function(x){return x.rep>=e.reps}),fond=top.filter(function(x){return x.rpe===3}).length>top.length/2;
+      if(tout&&!fond)return{kg:best+(e.base?2.5:1),pq:'toutes tes séries réussies la dernière fois'};if(fond)return{kg:best,pq:'dernière séance à fond : on consolide'};return{kg:best,pq:'même charge, vise une répétition de plus'}}return null}
+  S.surOuvrir(function(k){var l=$('cfgLigne'),c=conseillee(k),z=$('cfgConseil');if(!l)return;if(!z){z=document.createElement('div');z.id='cfgConseil';l.parentNode.insertBefore(z,l.nextSibling)}z.innerHTML='';if(!c)return;l=z;var b=document.createElement('button');b.className='conseille';b.type='button';b.innerHTML='Conseillé : '+String(c.kg).replace('.',',')+' kg';b.title=c.pq;b.setAttribute('aria-label','Charge conseillée : '+String(c.kg).replace('.',',')+' kilos, '+c.pq+'. Toucher pour la mettre.');b.onclick=function(){$('seKg').value=c.kg;toast(c.pq)};l.appendChild(b)});
   /* débloque le son sur iPhone au premier appui */
   document.addEventListener('touchend',function u(){audio();document.removeEventListener('touchend',u)},{once:true});
 
