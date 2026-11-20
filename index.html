@@ -274,6 +274,13 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
       <small class="est" style="display:block;margin-top:8px">Calcul : formule de Mifflin-St Jeor × niveau d'activité du travail. Les séances de sport s'ajoutent en plus. C'est une estimation, pas un avis médical.</small>
     </div>
     <div class="card">
+      <div class="lbl">Inviter des amis</div>
+      <p style="margin:6px 0">Partage CookYourself avec ton code. Bientôt : <b>1 mois de CookYourself+ offert</b> à toi et à ton ami quand l'abonnement sera lancé.</p>
+      <div class="big" style="font-size:24px;letter-spacing:2px" id="pCode">—</div>
+      <div class="row" style="margin-top:8px"><button class="main" id="pPartager">Inviter un ami</button></div>
+      <small class="est" id="pInfo" style="display:block;margin-top:8px">Ton code est tiré au hasard : il ne contient ni ton nom, ni ton e-mail, ni ton téléphone. Rien n'est envoyé sur Internet tant que tu ne partages pas le lien.</small>
+    </div>
+    <div class="card">
       <div class="lbl">Rappels d'eau</div>
       <label for="eRappel" style="display:flex;gap:10px;align-items:center;margin-top:8px;color:var(--ink);font-size:15px;min-height:44px"><input id="eRappel" type="checkbox" style="width:auto"> Activer les rappels</label>
       <div class="row num" style="margin-top:6px">
@@ -671,6 +678,21 @@ h2.rt{font-weight:700;font-size:20px;margin:10px 0 2px}
     try{if('Notification' in window&&Notification.permission==='granted'){navigator.serviceWorker&&navigator.serviceWorker.ready?navigator.serviceWorker.ready.then(function(s){s.showNotification('CookYourself',{body:t,icon:'icon-192.png'})}).catch(function(){new Notification('CookYourself',{body:t})}):new Notification('CookYourself',{body:t})}}catch(e){}
     toast(t);if(navigator.vibrate)navigator.vibrate([80,60,80])},20000);
   window.CYsuivi();
+})();
+</script>
+<script>
+/* Parrainage anonyme : code aléatoire gardé sur le téléphone. Récompenses activées avec l'abonnement. */
+(function(){
+  var U=window.UnGeste;function $(i){return document.getElementById(i)}
+  var d=U.db(),A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  if(!d.parrain){var c='';try{var b=new Uint8Array(6);crypto.getRandomValues(b);for(var i=0;i<6;i++)c+=A[b[i]%A.length]}catch(e){for(var i=0;i<6;i++)c+=A[Math.floor(Math.random()*A.length)]}d.parrain=c;U.save()}
+  try{var q=new URLSearchParams(location.search).get('p');if(q&&/^[A-Z0-9]{6}$/.test(q)&&q!==d.parrain&&!d.parrainePar){d.parrainePar=q;U.save()}
+    if(q)history.replaceState(null,'',location.pathname)}catch(e){}
+  $('pCode').textContent=d.parrain;
+  var lien='https://gothier83-art.github.io/cookyourself/?p='+d.parrain,txt='Je cuisine et je m\'entraîne avec CookYourself : recettes protéinées, suivi de l\'eau, sport. Gratuit et sans pub. Mon code : '+d.parrain;
+  $('pPartager').onclick=function(){if(navigator.share){navigator.share({title:'CookYourself',text:txt,url:lien}).catch(function(){})}
+    else{try{navigator.clipboard.writeText(txt+' '+lien).then(function(){$('pInfo').textContent='Lien copié : colle-le dans un message.'})}catch(e){$('pInfo').textContent=lien}}};
+  if(d.parrainePar)$('pInfo').textContent+=' Tu as été invité avec le code '+d.parrainePar+'.';
 })();
 </script>
 <script>
