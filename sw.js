@@ -2,8 +2,8 @@
    Les clés de stockage internes gardent le préfixe « ungeste » pour ne pas perdre les données déjà notées.
    À chaque mise à jour : changer CACHE. Les fichiers sont relus sur le serveur (cache: 'reload'),
    jamais dans le cache du navigateur, sinon une ancienne version pourrait rester. */
-const CACHE = 'cookyourself-v47';
-const FICHIERS = ['./', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './ciqual.js', './recettes.js', './recettes-proteines.js', './config.js', './droits.js', './compte.js', './entrainement.js', './bilan.js', './atelier.js', './atelier.css', './fonts/inter-tight.woff2', './fonts/space-grotesk.woff2', './confidentialite', './fonts/fredoka.woff2', './fonts/inter.woff2'];
+const CACHE = 'cookyourself-v48';
+const FICHIERS = ['./', './manifest.webmanifest', './icon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png', './ciqual.js', './recettes.js', './recettes-proteines.js', './config.js', './droits.js', './compte.js', './animations.js', './entrainement.js', './bilan.js', './atelier.js', './atelier.css', './fonts/inter-tight.woff2', './fonts/space-grotesk.woff2', './confidentialite', './fonts/fredoka.woff2', './fonts/inter.woff2'];
 /* Une réponse redirigée (Cloudflare : /app/index.html → /app/) ne peut pas être servie par le service worker :
    on la recopie sans le drapeau « redirigée » avant de la mettre en cache ou de la servir. */
 function propre(r){ if (!r || !r.redirected) return Promise.resolve(r); return r.blob().then(b => new Response(b, { status: r.status, statusText: r.statusText, headers: r.headers })); }

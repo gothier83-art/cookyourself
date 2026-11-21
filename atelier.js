@@ -15,10 +15,19 @@
   var eb=$('aEauBtn');if(eb)eb.onclick=function(){var b=document.querySelector('.rapides [data-ml="250"]');if(b)b.click()};
   var pg=$('jPoidsGo');if(pg)pg.onclick=function(){var n=document.querySelector('nav [data-v="histo"]');if(n)n.click();setTimeout(function(){var i=$('pSaisie');if(i){i.scrollIntoView({block:'center'});i.focus()}},80)};
   function accueil(){var j=U.jour(),pr=0,n=0;(j.repas||[]).forEach(function(x){if(x.p!=null){pr+=+x.p||0;n++}});
-    var jp=$('jProt');if(jp){var cible=B.protJour();jp.textContent=n?Math.round(pr)+' / '+cible+' g de protéines':'Manger · vise '+cible+' g de protéines'}
+    var jp=$('jProt');if(jp){jp.textContent=(j.repas||[]).length?'Manger':'Manger · note ton 1er repas'}
+    macros(j)
     var hs=$('hSerie'),gi=window.CYgamInfo&&window.CYgamInfo();var hd=$('hDate');if(hd){var nd=new Date();hd.textContent=nd.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}).replace(/^./,function(c){return c.toUpperCase()})}
     if(hs&&gi){var s=gi.serie.n;hs.classList.remove('hide');hs.hidden=!s;hs.textContent='🔥 '+s;hs.setAttribute('aria-label',s+' jour'+(s>1?'s':'')+' de suite')}
     forme()}
+
+  /* ===== Macros du jour : protéines, glucides, lipides, fibres (objectifs d'après l'objectif et le profil) ===== */
+  function macros(j){var z=$('jMacros2');if(!z){var c=document.querySelector('.jour-anneaux');if(!c)return;z=document.createElement('div');z.id='jMacros2';z.className='macros2';c.parentNode.insertBefore(z,c.nextSibling)}
+    var kc=(window.CYkcal&&window.CYkcal())||2200,pc=B.protJour(),lc=Math.round(kc*0.30/9),gc=Math.max(0,Math.round((kc-pc*4-lc*9)/4)),fc=30,t={p:0,g:0,l:0,f:0},vu={p:0,g:0,l:0,f:0};
+    (j.repas||[]).forEach(function(x){['p','g','l','f'].forEach(function(k){if(x[k]!=null&&isFinite(x[k])){t[k]+=+x[k];vu[k]++}})});
+    var L=[['p','Protéines',pc,'var(--fresh)'],['g','Glucides',gc,'var(--water)'],['l','Lipides',lc,'#E0A100'],['f','Fibres',fc,'var(--sleep)']];
+    z.innerHTML=L.map(function(m){var v=Math.round(t[m[0]]),pct=Math.min(100,v/m[2]*100);return '<div class="mc" aria-label="'+m[1]+' : '+v+' grammes sur '+m[2]+'"><div class="mcT">'+m[1]+'</div><div class="mcV"><b>'+v+'</b><small>/'+m[2]+' g</small></div><span class="bar"><i style="width:'+pct+'%;background:'+m[3]+'"></i></span></div>'}).join('')+
+      ((j.repas||[]).length&&!vu.f?'<div class="est mcN">Fibres comptées pour les aliments de la base et les recettes.</div>':'')}
 
   /* ===== Score de forme du matin (repère simple, pas un diagnostic) ===== */
   function score(){var j=U.jour(),s=j.sommeil;if(!s||!s.h)return null;var x=50,raisons=[];

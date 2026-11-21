@@ -243,3 +243,21 @@ main{overflow-x:clip}
 @media (max-width:360px){.onb-carte{gap:12px;padding:8px 12px 8px 8px}.onb-carte .ill{width:48px;height:48px;border-radius:14px}.onb-carte .ill svg{width:34px;height:34px}.onb-carte b{font-size:16px}.onb-carte small{font-size:13px}
   .onb-chiffre b{font-size:60px}.onb-chiffre span{font-size:18px;margin-left:4px}.onb-rond.gros{width:48px;height:48px;font-size:26px}.onb-pm{gap:4px}.onb-titre h1{font-size:25px}.onb-duo .ill{width:84px;height:84px;border-radius:24px}.onb-duo .ill svg{width:60px;height:60px}}
 @media (prefers-reduced-motion:reduce){.onb-ecran,.onb-stat,.onb-demarre,.onb-sceau,.onb-bouteille .vague,.cy-a-faire,.onb-carte .coche{animation:none!important}.onb-prog i,.onb-carte{transition:none}}
+
+/* Macros du jour (accueil) */
+.macros2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:-4px 0 12px}
+.macros2 .mc{background:var(--card);border-radius:14px;padding:10px 10px 12px;box-shadow:var(--ombre)}
+@media (prefers-color-scheme:dark){.macros2 .mc{border:1px solid var(--line)}}
+.mcT{font-size:12px;color:var(--mute);font-weight:500}.mcV{margin:2px 0 6px;white-space:nowrap}.mcV b{font-family:var(--chiffres);font-size:18px;font-weight:600}.mcV small{font-size:12px;color:var(--mute)}
+.macros2 .bar{display:block;height:5px}.mcN{grid-column:1/-1;font-size:12px}
+@media (max-width:360px){.macros2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Catalogue des exercices */
+.catal{max-height:94vh}
+.catE{border-top:1px solid var(--line)}.catE summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:56px;padding:8px 0;cursor:pointer}
+.catE summary::-webkit-details-marker{display:none}.catN{display:flex;flex-direction:column;min-width:0}.catN b{font-size:15px}.catM{font-size:13px;color:var(--mute)}
+.catTag{flex:0 0 auto;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--mute)}
+.catE[open] summary .catTag{background:var(--acc2);color:var(--acc-ink)}.catB{padding:0 0 12px}
+/* animation du mouvement en tête de la fiche « Comment faire le mouvement » (animations.js) */
+.anim{display:flex;justify-content:center;margin:4px 0 10px;padding:6px 0 2px;border-radius:16px;background:var(--soft);color:var(--ink)}
+.anim svg{display:block;width:220px;max-width:100%;height:auto}
