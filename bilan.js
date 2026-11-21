@@ -97,25 +97,57 @@
 
   /* ===== Graphique jour par jour ===== */
   var per=7;try{per=+localStorage.getItem('cy.per')||7}catch(e){}if([7,14,30].indexOf(per)<0)per=7;var choisi=-1;
+  /* vue du graphique : barres, lignes ou croisé (plusieurs données sur un même graphique) */
+  var vueG='barres',croise=['sommeil','eau','vol'];try{vueG=localStorage.getItem('cy.vueG')||'barres';var cr=localStorage.getItem('cy.croise');if(cr)croise=cr.split(',').filter(Boolean)}catch(e){}
+  function pearson(a,b){var P=[];a.forEach(function(x,i){if(x!=null&&b[i]!=null)P.push([x,b[i]])});if(P.length<5)return null;var mx=moy(P.map(function(p){return p[0]})),my=moy(P.map(function(p){return p[1]})),sxy=0,sx=0,sy=0;P.forEach(function(p){sxy+=(p[0]-mx)*(p[1]-my);sx+=Math.pow(p[0]-mx,2);sy+=Math.pow(p[1]-my,2)});return sx&&sy?sxy/Math.sqrt(sx*sy):null}
+  function vueCroisee(R,ks,cw,W){var n=ks.length,H=190,sel=R.filter(function(r){return croise.indexOf(r.k)>=0}),h='';
+    h+='<div class="chips" role="group" aria-label="Données à croiser" style="margin-top:4px">'+R.map(function(r){var on=croise.indexOf(r.k)>=0;return '<button data-croise="'+r.k+'" aria-pressed="'+on+'" style="'+(on?'background:'+r.c+';color:#fff':'')+'"><span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(on?'#fff':r.c)+';margin-right:6px"></span>'+r.nom.split(' (')[0]+'</button>'}).join('')+'</div>';
+    var sv='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Graphique croisé : '+sel.map(function(r){return r.nom.split(' (')[0]}).join(', ')+'">';
+    sv+='<rect x="'+(choisi*cw)+'" y="0" width="'+cw+'" height="'+H+'" fill="var(--soft)" rx="4"/>';
+    var y1=H-14-(1/1.5)*(H-28);sv+='<line x1="0" x2="'+W+'" y1="'+y1.toFixed(1)+'" y2="'+y1.toFixed(1)+'" stroke="var(--mute)" stroke-dasharray="4 4" stroke-width="1"/><text x="2" y="'+(y1-4).toFixed(1)+'" font-size="10" fill="var(--mute)">objectif</text>';
+    var series={};sel.forEach(function(r){var val=ks.map(r.f),ok=val.filter(function(x){return x!=null});if(!ok.length)return;var mx=Math.max.apply(0,ok),mn=Math.min.apply(0,ok);
+      var ratio=function(x){if(r.ref)return x/r.ref;if(r.ligne)return 0.4+((x-mn)/((mx-mn)||1))*0.8;return x/(mx||1)};series[r.k]=val;
+      var pts=val.map(function(x,i){return x==null?null:[(i+.5)*cw,H-14-Math.min(1.5,ratio(x))/1.5*(H-28)]}),run=[];
+      function trace(){if(run.length>1)sv+='<polyline points="'+run.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'" fill="none" stroke="'+r.c+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';run=[]}
+      pts.forEach(function(p){if(p)run.push(p)});trace();   /* on relie tous les jours notés, même espacés */
+      pts.forEach(function(p,i){if(p)sv+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(i===choisi?4.5:2.5)+'" fill="'+r.c+'"/>'})});
+    ks.forEach(function(k,i){sv+='<rect data-bj="'+i+'" x="'+(i*cw)+'" y="0" width="'+cw+'" height="'+H+'" fill="transparent" style="cursor:pointer"/>'});
+    h+='<div class="brow">'+sv+'</svg></div><div class="est" style="font-size:12.5px">Chaque courbe est en % de son objectif (sommeil 8 h, eau, calories). Les charges sont en % de ta meilleure journée, le poids suit sa propre échelle.</div>';
+    /* lecture : le lien le plus fort entre deux données choisies */
+    var best=null,ks2=Object.keys(series);for(var a=0;a<ks2.length;a++)for(var b=a+1;b<ks2.length;b++){var r=pearson(series[ks2[a]],series[ks2[b]]);if(r!=null&&(!best||Math.abs(r)>Math.abs(best.r)))best={a:ks2[a],b:ks2[b],r:r}}
+    var SUJ={sommeil:['ton sommeil',0],eau:['ton eau',0],kcal:['tes calories',1],poids:['ton poids',0],vol:['tes charges soulevées',1]};
+    function verbe(k,haut){var pl=SUJ[k][1];return haut?(pl?'augmentent':'augmente'):(pl?'baissent':'baisse')}
+    if(best&&Math.abs(best.r)>=0.4)h+='<div class="bdet" style="margin-top:8px"><b>Lecture :</b> quand '+SUJ[best.a][0]+' '+verbe(best.a,1)+', '+SUJ[best.b][0]+' '+(best.r>0?verbe(best.b,1)+' aussi':verbe(best.b,0))+' (lien '+(Math.abs(best.r)>=0.7?'fort':'moyen')+' sur cette période).</div>';
+    else if(ks2.length>=2)h+='<div class="est" style="margin-top:8px">Pas encore de lien net entre ces données. Il faut au moins 5 jours notés pour chacune.</div>';
+    return h}
   function bilan(){var ks=jours(per),n=ks.length,W=320,cw=W/n,ck=cibleKcal(),obj=objMl();if(choisi<0||choisi>=n)choisi=n-1;
     var R=[{k:'sommeil',nom:'Sommeil',c:'var(--sleep)',f:dodo,u:function(x){return hm(x)},ref:8,refT:'8 h'},
       {k:'eau',nom:'Eau',c:'var(--water)',f:function(k){var x=eau(k);return x?x/1000:null},u:function(x){return v(x,1)+' L'},ref:obj/1000,refT:v(obj/1000,1)+' L'},
       {k:'kcal',nom:'Calories',c:'var(--acc)',f:kcal,u:function(x){return v(x)+' kcal'},ref:ck,refT:ck?v(ck)+' kcal':'',cache:true},
       {k:'poids',nom:'Poids (orange : moyenne 7 j)',c:'var(--mute)',f:poids,u:function(x){return v(x,1)+' kg'},ligne:true,cache:true},
       {k:'vol',nom:'Charges soulevées',c:'var(--fresh)',f:volume,u:function(x){return x>=1000?v(x/1000,1)+' t':v(x)+' kg'},parS:true}];
-    var tout=0,h='<div class="row" style="justify-content:space-between"><div class="lbl" style="font-weight:600;color:var(--ink);flex:1">Ton bilan jour par jour</div></div><div class="chips" role="group" aria-label="Période">'+[7,14,30].map(function(p){return '<button data-per="'+p+'" aria-pressed="'+(per===p)+'">'+p+' jours</button>'}).join('')+'</div>';
+    var tout=0,h='<div class="row" style="justify-content:space-between"><div class="lbl" style="font-weight:600;color:var(--ink);flex:1">Ton bilan jour par jour</div></div><div class="chips" role="group" aria-label="Période">'+[7,14,30].map(function(p){return '<button data-per="'+p+'" aria-pressed="'+(per===p)+'">'+p+' jours</button>'}).join('')+'</div>'+
+      '<div class="seg" role="group" aria-label="Type de graphique" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:10px 0 0">'+[['barres','Barres'],['lignes','Lignes'],['croise','Croisé']].map(function(x){return '<button data-vueg="'+x[0]+'" aria-pressed="'+(vueG===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+    var Rv=R.filter(function(r){return !(r.cache&&cache())});
+    if(vueG==='croise'){h+=vueCroisee(Rv,ks,cw,W);Rv.forEach(function(r){tout+=ks.map(r.f).filter(function(x){return x!=null}).length});R=[]}
     R.forEach(function(r){if(r.cache&&cache())return;var val=ks.map(r.f),ok=val.filter(function(x){return x!=null}),max=Math.max.apply(0,ok.concat((r.ref||0)*1.2,0.0001)),min=r.ligne&&ok.length?Math.min.apply(0,ok):0;tout+=ok.length;
       var H=64,sv='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+r.nom+' sur '+per+' jours'+(ok.length?', moyenne '+r.u(moy(ok)):', aucune donnée')+'">';
       sv+='<rect x="'+(choisi*cw)+'" y="0" width="'+cw+'" height="'+H+'" fill="var(--soft)" rx="4"/>';
-      if(r.ref&&!r.ligne){var y=H-2-(r.ref/max)*(H-6);sv+='<line x1="0" x2="'+W+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="var(--mute)" stroke-dasharray="3 3" stroke-width="1"/>'}
+      if(r.ref&&!r.ligne&&vueG!=='lignes'){var y=H-2-(r.ref/max)*(H-6);sv+='<line x1="0" x2="'+W+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" stroke="var(--mute)" stroke-dasharray="3 3" stroke-width="1"/>'}
       if(r.ligne&&ok.length){var mid=(max+min)/2;if(max-min<2){max=mid+1;min=mid-1}}
       if(r.ligne){var rg=(max-min)||1,pts=[];val.forEach(function(x,i){if(x!=null)pts.push([(i+.5)*cw,H-8-(x-min)/rg*(H-20)])});
         if(pts.length>2){var tous=(D().poidsLog||[]),mm=[];ks.forEach(function(k,i){var d0=dk(k),fen=tous.filter(function(x){var d=dk(x.d);return d<=d0&&d>d0-7*864e5});if(fen.length>=2){var m=moy(fen.map(function(x){return x.kg}));mm.push([(i+.5)*cw,H-8-(m-min)/rg*(H-20)])}});
           if(mm.length>1)sv+='<polyline points="'+mm.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linejoin="round" opacity=".9"/>'}
         if(pts.length>1){sv+='<text x="2" y="10" font-size="10" fill="var(--mute)">'+v(max,1)+'</text><text x="2" y="'+(H-1)+'" font-size="10" fill="var(--mute)">'+v(min,1)+'</text>'}
         if(pts.length>1)sv+='<polyline points="'+pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'" fill="none" stroke="'+r.c+'" stroke-width="2" stroke-linejoin="round"/>';pts.forEach(function(p){sv+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+r.c+'"/>'})}
+      else if(vueG==='lignes'){var lo=Math.min.apply(0,ok.concat(r.ref?[r.ref]:[])),hi=Math.max.apply(0,ok.concat(r.ref?[r.ref]:[])),pad=Math.max((hi-lo)*0.15,hi*0.03||1);lo=Math.max(0,lo-pad);hi=hi+pad;
+        var yl=function(x){return H-6-(x-lo)/((hi-lo)||1)*(H-18)};if(r.ref){var yr=yl(r.ref);sv+='<line x1="0" x2="'+W+'" y1="'+yr.toFixed(1)+'" y2="'+yr.toFixed(1)+'" stroke="var(--mute)" stroke-dasharray="3 3" stroke-width="1"/>'}
+        var ptl=val.map(function(x,i){return x==null?null:[(i+.5)*cw,yl(x)]}),run=[];
+        if(val[choisi]!=null){var pc=ptl[choisi];sv+='<text x="'+Math.min(W-2,Math.max(2,pc[0])).toFixed(1)+'" y="'+Math.max(10,pc[1]-8).toFixed(1)+'" font-size="10" font-weight="700" text-anchor="'+(choisi>n*0.8?'end':choisi<n*0.2?'start':'middle')+'" fill="var(--ink)">'+esc(r.u(val[choisi]))+'</text>'}
+        function tr(){if(run.length>1){sv+='<polygon points="'+run[0][0].toFixed(1)+','+H+' '+run.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+' '+run[run.length-1][0].toFixed(1)+','+H+'" fill="'+r.c+'" opacity=".12"/><polyline points="'+run.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'" fill="none" stroke="'+r.c+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'}run=[]}
+        ptl.forEach(function(p){if(p)run.push(p)});tr();ptl.forEach(function(p,i){if(p)sv+='<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+(i===choisi?4.5:2.5)+'" fill="'+r.c+'"/>'})}
       else val.forEach(function(x,i){if(x==null)return;var bh=Math.max(2,(x/max)*(H-6));sv+='<rect x="'+(i*cw+cw*.18).toFixed(1)+'" y="'+(H-bh).toFixed(1)+'" width="'+(cw*.64).toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="'+Math.min(3,cw*.2).toFixed(1)+'" fill="'+r.c+'" opacity="'+(i===choisi?1:.35)+'"/>'});
-      if(!r.ligne&&val[choisi]!=null){var yy=Math.max(10,H-Math.max(2,(val[choisi]/max)*(H-6))-3),xx=Math.min(W-2,Math.max(2,(choisi+.5)*cw));sv+='<text x="'+xx.toFixed(1)+'" y="'+yy.toFixed(1)+'" font-size="10" font-weight="700" text-anchor="'+(choisi>n*0.8?'end':choisi<n*0.2?'start':'middle')+'" fill="var(--ink)">'+esc(r.u(val[choisi]))+'</text>'}
+      if(!r.ligne&&vueG!=='lignes'&&val[choisi]!=null){var yy=Math.max(10,H-Math.max(2,(val[choisi]/max)*(H-6))-3),xx=Math.min(W-2,Math.max(2,(choisi+.5)*cw));sv+='<text x="'+xx.toFixed(1)+'" y="'+yy.toFixed(1)+'" font-size="10" font-weight="700" text-anchor="'+(choisi>n*0.8?'end':choisi<n*0.2?'start':'middle')+'" fill="var(--ink)">'+esc(r.u(val[choisi]))+'</text>'}
       ks.forEach(function(k,i){sv+='<rect data-bj="'+i+'" x="'+(i*cw)+'" y="0" width="'+cw+'" height="'+H+'" fill="transparent" style="cursor:pointer"/>'});
       h+='<div class="brow"><div class="blbl"><span><i style="background:'+r.c+'"></i>'+r.nom+'</span><span class="est">'+(ok.length?(r.parS?'moy. par séance ':r.ligne?(ok.length>1?v(ok[0],1)+' → ':''):'moy. ')+r.u(r.ligne?ok[ok.length-1]:moy(ok)):'—')+(r.refT&&!r.ligne?' · objectif '+r.refT:'')+'</span></div>'+sv+'</svg></div>'});
     var step=per===7?1:per===14?2:5;h+='<div class="bx">'+ks.map(function(k,i){var d=dk(k);return '<span style="width:'+(100/n)+'%">'+((n-1-i)%step===0?(per===7?['Di','Lu','Ma','Me','Je','Ve','Sa'][d.getDay()]:dm(k)):'')+'</span>'}).join('')+'</div>';
@@ -162,12 +194,14 @@
   function ouvrirSom(){var js=$('jSommeil');if(!$('sommeilCard')&&js){js.dataset.edit='1';js.classList.remove('hide');var m=$('jSomMod');if(m)m.click();js.scrollIntoView({behavior:'smooth',block:'center'});return}editSom=true;sommeil();var z=$('sommeilCard');z.scrollIntoView({behavior:'smooth',block:'center'});var b=z.querySelector('button');if(b)b.focus({preventScroll:true})}
   document.addEventListener('keydown',function(e){if(e.target.id==='aSommeilBtn'&&(e.key==='Enter'||e.key===' ')){e.preventDefault();ouvrirSom()}});
   function noterSom(h){var j=U.jour(),q=j.sommeil&&j.sommeil.q;j.sommeil={h:Math.round(h*4)/4,q:q||0};editSom=false;U.save();toast('Sommeil noté : '+hm(j.sommeil.h))}
-  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#aSommeilBtn')){ouvrirSom();return}var t=e.target.closest&&e.target.closest('[data-somh],[data-somq],[data-goal],[data-per],[data-bj],#goalMod,#goalNon');if(!t)return;var d=t.dataset;
+  document.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('#aSommeilBtn')){ouvrirSom();return}var t=e.target.closest&&e.target.closest('[data-somh],[data-somq],[data-goal],[data-per],[data-bj],[data-vueg],[data-croise],#goalMod,#goalNon');if(!t)return;var d=t.dataset;
     if(d.somh)noterSom(+d.somh);
     if(d.somq){var j=U.jour();if(j.sommeil){j.sommeil.q=+d.somq;U.save()}}
     if(d.goal){if(t.disabled)return;enChoix=false;O.choisir(d.goal);var g=O.GOAL[d.goal];toast(g.ic+' Objectif : '+g.nom)}
     if(t.id==='goalMod'){enChoix=true;rendre()}
     if(t.id==='goalNon'){enChoix=false;rendre()}
+    if(d.vueg){vueG=d.vueg;try{localStorage.setItem('cy.vueG',vueG)}catch(x){}rendre();var bt=document.querySelector('[data-vueg="'+vueG+'"]');if(bt)bt.focus({preventScroll:true});return}
+    if(d.croise){var i0=croise.indexOf(d.croise);if(i0>=0)croise.splice(i0,1);else croise.push(d.croise);try{localStorage.setItem('cy.croise',croise.join(','))}catch(x){}rendre();return}
     if(d.per){per=+d.per;choisi=-1;try{localStorage.setItem('cy.per',per)}catch(x){}rendre()}
     if(d.bj!==undefined){choisi=+d.bj;rendre()}});
   document.addEventListener('change',function(e){if(e.target.id==='evoSel'){exoSel=e.target.value;try{localStorage.setItem('cy.exoSel',exoSel)}catch(x){}rendre()}});
